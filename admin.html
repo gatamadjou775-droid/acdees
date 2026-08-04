@@ -1,0 +1,1414 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Administration — ACDEES</title>
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,600;0,700;1,400&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet"/>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    :root {
+      --green: #1F7A3D; --green-dark: #155C2D; --green-glow: rgba(31,122,61,.18);
+      --gold: #D4AF37; --gold-dim: #9B7E22; --gold-light: rgba(212,175,55,.15);
+      --navy: #0B1320; --navy2: #111B2E; --surface: #162035; --surface2: #1C2840;
+      --white: #FFFFFF; --border: rgba(255,255,255,.07); --border-green: rgba(31,122,61,.25);
+      --border-gold: rgba(212,175,55,.18); --muted: rgba(255,255,255,.45);
+      --red: #ef4444; --red-bg: rgba(239,68,68,.1);
+    }
+    html { scroll-behavior: smooth; }
+    body { background: var(--navy); color: var(--white); font-family: 'Inter', sans-serif; font-weight: 300; line-height: 1.6; overflow-x: hidden; }
+
+    /* ── LOGIN ── */
+    #login-screen {
+      min-height: 100vh; display: flex; align-items: center; justify-content: center;
+      background: radial-gradient(ellipse 60% 60% at 50% 40%, rgba(31,122,61,.1), transparent 70%);
+      padding: 20px;
+    }
+    .login-box {
+      background: var(--surface); border: 1px solid var(--border-gold);
+      border-radius: 20px; padding: 52px 44px; width: 100%; max-width: 440px;
+      text-align: center;
+    }
+    .login-logo { display: flex; align-items: center; justify-content: center; gap: 12px; margin-bottom: 8px; }
+    .logo-mark { width: 44px; height: 44px; background: linear-gradient(135deg, var(--green), var(--green-dark)); border-radius: 10px; display: flex; align-items: center; justify-content: center; font-family: 'Playfair Display', serif; font-weight: 700; font-size: 1rem; color: var(--gold); }
+    .logo-text { font-family: 'Playfair Display', serif; font-size: 1.4rem; font-weight: 700; }
+    .logo-text span { color: var(--gold); }
+    .login-subtitle { font-size: .72rem; letter-spacing: .18em; text-transform: uppercase; color: var(--gold); margin-bottom: 36px; }
+    .login-title { font-family: 'Playfair Display', serif; font-size: 1.4rem; margin-bottom: 6px; }
+    .login-desc { font-size: .82rem; color: var(--muted); margin-bottom: 32px; }
+    .form-group { margin-bottom: 18px; text-align: left; }
+    .form-label { display: block; font-size: .72rem; letter-spacing: .12em; text-transform: uppercase; color: var(--muted); margin-bottom: 7px; }
+    .form-input {
+      width: 100%; background: rgba(255,255,255,.04); border: 1px solid var(--border);
+      border-radius: 8px; color: var(--white); font-family: 'Inter', sans-serif;
+      font-size: .9rem; padding: 12px 16px; outline: none; transition: border-color .3s;
+    }
+    .form-input:focus { border-color: var(--green); background: rgba(31,122,61,.06); }
+    .form-input::placeholder { color: rgba(255,255,255,.2); }
+    .btn-login { width: 100%; background: linear-gradient(135deg, var(--green), var(--green-dark)); color: var(--white); font-size: .82rem; font-weight: 600; letter-spacing: .12em; text-transform: uppercase; padding: 14px; border-radius: 8px; border: none; cursor: pointer; margin-top: 8px; font-family: 'Inter', sans-serif; transition: opacity .3s, transform .3s; box-shadow: 0 6px 24px rgba(31,122,61,.35); }
+    .btn-login:hover { opacity: .88; transform: translateY(-2px); }
+    .login-alert { background: var(--red-bg); border: 1px solid rgba(239,68,68,.25); color: #fca5a5; font-size: .82rem; padding: 12px 16px; border-radius: 8px; margin-bottom: 18px; display: none; text-align: left; }
+    .login-shield { margin-top: 24px; font-size: .72rem; color: rgba(255,255,255,.2); display: flex; align-items: center; justify-content: center; gap: 6px; }
+    .attempts-left { font-size: .72rem; color: rgba(255,255,255,.3); margin-top: 10px; }
+
+    /* ── ADMIN LAYOUT ── */
+    #admin-screen { display: none; min-height: 100vh; }
+
+    .admin-sidebar {
+      position: fixed; left: 0; top: 0; bottom: 0; width: 260px;
+      background: var(--navy2); border-right: 1px solid var(--border);
+      display: flex; flex-direction: column; z-index: 100;
+      overflow-y: auto;
+    }
+    .sidebar-header { padding: 28px 24px 20px; border-bottom: 1px solid var(--border); }
+    .sidebar-badge { font-size: .62rem; letter-spacing: .18em; text-transform: uppercase; background: rgba(212,175,55,.12); border: 1px solid var(--border-gold); color: var(--gold); padding: 3px 10px; border-radius: 100px; display: inline-block; margin-top: 8px; }
+
+    .sidebar-nav { padding: 16px 12px; flex: 1; }
+    .nav-section-label { font-size: .62rem; letter-spacing: .18em; text-transform: uppercase; color: rgba(255,255,255,.25); padding: 12px 12px 6px; }
+    .nav-item {
+      display: flex; align-items: center; gap: 12px; padding: 11px 14px;
+      border-radius: 8px; cursor: pointer; font-size: .85rem; color: var(--muted);
+      transition: all .25s; text-decoration: none; margin-bottom: 2px;
+    }
+    .nav-item:hover { background: rgba(255,255,255,.04); color: var(--white); }
+    .nav-item.active { background: rgba(31,122,61,.15); color: var(--white); border: 1px solid var(--border-green); }
+    .nav-item .nav-icon { width: 20px; text-align: center; font-size: 1rem; flex-shrink: 0; }
+    .nav-badge { margin-left: auto; background: var(--green); color: var(--white); font-size: .62rem; font-weight: 600; padding: 2px 7px; border-radius: 100px; }
+
+    .sidebar-footer { padding: 16px 20px; border-top: 1px solid var(--border); }
+    .admin-user { display: flex; align-items: center; gap: 12px; margin-bottom: 12px; }
+    .admin-avatar { width: 38px; height: 38px; border-radius: 50%; overflow: hidden; border: 2px solid var(--gold); flex-shrink: 0; }
+    .admin-avatar img { width: 100%; height: 100%; object-fit: cover; }
+    .admin-user-name { font-size: .85rem; font-weight: 500; }
+    .admin-user-role { font-size: .68rem; color: var(--gold); }
+    .btn-logout { width: 100%; background: rgba(239,68,68,.08); border: 1px solid rgba(239,68,68,.2); color: #fca5a5; font-size: .74rem; letter-spacing: .1em; text-transform: uppercase; padding: 9px; border-radius: 6px; cursor: pointer; font-family: 'Inter', sans-serif; transition: all .3s; }
+    .btn-logout:hover { background: rgba(239,68,68,.15); }
+
+    .admin-main { margin-left: 260px; min-height: 100vh; }
+    .admin-topbar { background: var(--navy2); border-bottom: 1px solid var(--border); padding: 16px 36px; display: flex; align-items: center; justify-content: space-between; position: sticky; top: 0; z-index: 50; }
+    .topbar-title { font-family: 'Playfair Display', serif; font-size: 1.1rem; }
+    .topbar-actions { display: flex; gap: 10px; align-items: center; }
+    .topbar-time { font-size: .75rem; color: var(--muted); }
+
+    .admin-content { padding: 36px; }
+    .admin-tab { display: none; }
+    .admin-tab.active { display: block; }
+
+    /* ── COMPONENTS ── */
+    .grid-4 { display: grid; grid-template-columns: repeat(4,1fr); gap: 18px; margin-bottom: 32px; }
+    .grid-3 { display: grid; grid-template-columns: repeat(3,1fr); gap: 18px; }
+    .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 24px; }
+
+    .stat-card { background: var(--surface); border: 1px solid var(--border); border-radius: 12px; padding: 22px; }
+    .stat-card .s-val { font-family: 'Playfair Display', serif; font-size: 2rem; color: var(--gold); line-height: 1; }
+    .stat-card .s-label { font-size: .75rem; color: var(--muted); margin-top: 6px; }
+    .stat-card .s-trend { font-size: .72rem; color: #6ee7a0; margin-top: 4px; }
+    .stat-card .s-trend.down { color: #fca5a5; }
+
+    .card { background: var(--surface); border: 1px solid var(--border); border-radius: 12px; }
+    .card-header { padding: 20px 24px; border-bottom: 1px solid var(--border); display: flex; align-items: center; justify-content: space-between; }
+    .card-title { font-family: 'Playfair Display', serif; font-size: 1rem; }
+    .card-body { padding: 24px; }
+
+    .section-title { font-family: 'Playfair Display', serif; font-size: 1.4rem; margin-bottom: 6px; }
+    .section-desc { font-size: .83rem; color: var(--muted); margin-bottom: 28px; }
+
+    /* Form */
+    .f-group { margin-bottom: 20px; }
+    .f-label { display: block; font-size: .72rem; letter-spacing: .1em; text-transform: uppercase; color: var(--muted); margin-bottom: 7px; }
+    .f-label .req { color: var(--gold); }
+    .f-input, .f-select, .f-textarea {
+      width: 100%; background: rgba(255,255,255,.04); border: 1px solid var(--border);
+      border-radius: 8px; color: var(--white); font-family: 'Inter', sans-serif;
+      font-size: .88rem; font-weight: 300; padding: 11px 14px; outline: none;
+      transition: border-color .3s, background .3s;
+    }
+    .f-input:focus, .f-select:focus, .f-textarea:focus { border-color: var(--green); background: rgba(31,122,61,.05); }
+    .f-input::placeholder, .f-textarea::placeholder { color: rgba(255,255,255,.2); }
+    .f-select option { background: var(--navy2); }
+    .f-textarea { resize: vertical; min-height: 100px; }
+    .f-note { font-size: .73rem; color: rgba(255,255,255,.3); margin-top: 5px; }
+    .f-row { display: grid; grid-template-columns: 1fr 1fr; gap: 18px; }
+    .f-row-3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 16px; }
+
+    .btn { display: inline-flex; align-items: center; gap: 8px; font-family: 'Inter', sans-serif; font-size: .8rem; font-weight: 500; letter-spacing: .1em; text-transform: uppercase; padding: 11px 22px; border-radius: 8px; border: none; cursor: pointer; transition: all .3s; }
+    .btn-primary { background: var(--green); color: var(--white); }
+    .btn-primary:hover { background: var(--green-dark); transform: translateY(-1px); }
+    .btn-gold { background: var(--gold); color: var(--navy); }
+    .btn-gold:hover { opacity: .88; }
+    .btn-ghost { background: rgba(255,255,255,.05); color: var(--white); border: 1px solid var(--border); }
+    .btn-ghost:hover { background: rgba(255,255,255,.08); }
+    .btn-danger { background: var(--red-bg); color: #fca5a5; border: 1px solid rgba(239,68,68,.2); }
+    .btn-danger:hover { background: rgba(239,68,68,.18); }
+    .btn-sm { padding: 7px 14px; font-size: .72rem; }
+
+    /* Table */
+    .admin-table { width: 100%; border-collapse: collapse; }
+    .admin-table thead tr { border-bottom: 1px solid var(--border); }
+    .admin-table th { text-align: left; padding: 10px 14px; font-size: .68rem; letter-spacing: .14em; text-transform: uppercase; color: rgba(255,255,255,.3); font-weight: 400; }
+    .admin-table tbody tr { border-bottom: 1px solid rgba(255,255,255,.04); transition: background .2s; }
+    .admin-table tbody tr:hover { background: rgba(255,255,255,.02); }
+    .admin-table td { padding: 14px; font-size: .84rem; color: var(--muted); vertical-align: middle; }
+    .admin-table td:first-child { color: var(--white); }
+
+    .pill { font-size: .65rem; letter-spacing: .1em; text-transform: uppercase; padding: 4px 12px; border-radius: 100px; }
+    .pill-green { background: rgba(31,122,61,.2); color: #6ee7a0; border: 1px solid rgba(110,231,160,.2); }
+    .pill-gold { background: rgba(212,175,55,.12); color: var(--gold); border: 1px solid var(--border-gold); }
+    .pill-gray { background: rgba(255,255,255,.05); color: rgba(255,255,255,.4); border: 1px solid var(--border); }
+    .pill-red { background: var(--red-bg); color: #fca5a5; border: 1px solid rgba(239,68,68,.2); }
+
+    /* Toast */
+    .toast { position: fixed; bottom: 28px; right: 28px; z-index: 999; background: var(--surface); border: 1px solid var(--border-green); border-radius: 10px; padding: 14px 20px; font-size: .84rem; display: flex; align-items: center; gap: 10px; box-shadow: 0 8px 32px rgba(0,0,0,.4); transform: translateY(80px); opacity: 0; transition: all .4s cubic-bezier(.16,1,.3,1); max-width: 340px; }
+    .toast.show { transform: none; opacity: 1; }
+    .toast.error { border-color: rgba(239,68,68,.3); }
+    .toast-icon { font-size: 1.1rem; flex-shrink: 0; }
+
+    /* Toggle switch */
+    .toggle-wrap { display: flex; align-items: center; gap: 12px; }
+    .toggle { position: relative; width: 44px; height: 24px; flex-shrink: 0; }
+    .toggle input { opacity: 0; width: 0; height: 0; }
+    .toggle-slider { position: absolute; inset: 0; background: rgba(255,255,255,.1); border-radius: 100px; cursor: pointer; transition: .3s; }
+    .toggle-slider::before { content: ''; position: absolute; width: 18px; height: 18px; background: white; border-radius: 50%; bottom: 3px; left: 3px; transition: .3s; }
+    input:checked + .toggle-slider { background: var(--green); }
+    input:checked + .toggle-slider::before { transform: translateX(20px); }
+    .toggle-label { font-size: .85rem; color: var(--muted); }
+
+    /* Rich text area */
+    .rich-toolbar { background: rgba(255,255,255,.04); border: 1px solid var(--border); border-bottom: none; border-radius: 8px 8px 0 0; padding: 8px 12px; display: flex; gap: 6px; flex-wrap: wrap; }
+    .rich-btn { background: rgba(255,255,255,.06); border: 1px solid var(--border); color: rgba(255,255,255,.6); font-size: .78rem; padding: 4px 10px; border-radius: 4px; cursor: pointer; font-family: 'Inter', sans-serif; transition: all .2s; }
+    .rich-btn:hover { background: rgba(31,122,61,.15); color: var(--white); border-color: var(--border-green); }
+    .rich-area { border-radius: 0 0 8px 8px !important; border-top: none !important; }
+
+    /* Image upload */
+    .img-upload {
+      border: 2px dashed rgba(255,255,255,.1); border-radius: 10px;
+      padding: 32px; text-align: center; cursor: pointer;
+      transition: all .3s;
+    }
+    .img-upload:hover { border-color: var(--green); background: rgba(31,122,61,.05); }
+    .img-upload-icon { font-size: 2.5rem; margin-bottom: 10px; }
+    .img-upload-text { font-size: .83rem; color: var(--muted); }
+    .img-preview { width: 120px; height: 120px; border-radius: 10px; object-fit: cover; border: 2px solid var(--border-green); display: none; margin: 10px auto 0; }
+
+    /* Alert */
+    .alert { padding: 12px 16px; border-radius: 8px; font-size: .83rem; margin-bottom: 16px; display: none; }
+    .alert-ok { background: rgba(31,122,61,.15); border: 1px solid var(--border-green); color: #6ee7a0; }
+    .alert-err { background: var(--red-bg); border: 1px solid rgba(239,68,68,.2); color: #fca5a5; }
+
+    /* Notification dot */
+    .notif-dot { width: 8px; height: 8px; background: var(--red); border-radius: 50%; display: inline-block; margin-left: 4px; }
+
+    /* Color picker */
+    .color-row { display: flex; align-items: center; gap: 12px; }
+    .color-row input[type=color] { width: 44px; height: 36px; border: 1px solid var(--border); border-radius: 6px; background: none; cursor: pointer; padding: 2px; }
+
+    /* Progress */
+    .progress-bar { background: rgba(255,255,255,.06); border-radius: 100px; height: 6px; overflow: hidden; }
+    .progress-fill { height: 100%; background: linear-gradient(to right, var(--green), var(--gold)); border-radius: 100px; transition: width .5s; }
+
+    @media(max-width:900px) {
+      .admin-sidebar { width: 220px; }
+      .admin-main { margin-left: 220px; }
+      .admin-content { padding: 20px; }
+      .grid-4 { grid-template-columns: 1fr 1fr; }
+      .f-row, .f-row-3 { grid-template-columns: 1fr; }
+    }
+  </style>
+</head>
+<body>
+
+<!-- ══════════════════════════════════════
+     LOGIN SCREEN
+══════════════════════════════════════ -->
+<div id="login-screen">
+  <div class="login-box">
+    <div class="login-logo">
+      <img src="logo.png" alt="ACDEES" style="height:46px;width:auto;object-fit:contain;"/>
+    </div>
+    <div class="login-subtitle">Panneau d'administration</div>
+    <h2 class="login-title" style="margin-top:24px;">Accès sécurisé</h2>
+    <p class="login-desc">Réservé à GATA MADJOU PYRRHUS · Directeur Général</p>
+
+    <div class="login-alert" id="login-alert"></div>
+    <div id="locked-msg" style="display:none;background:rgba(239,68,68,.1);border:1px solid rgba(239,68,68,.2);color:#fca5a5;padding:14px;border-radius:8px;margin-bottom:16px;font-size:.83rem;">🔒 Compte temporairement bloqué. Réessayez dans <span id="countdown">60</span>s.</div>
+
+    <div class="form-group">
+      <label class="form-label">Identifiant</label>
+      <input class="form-input" type="text" id="l-user" placeholder="Identifiant admin" autocomplete="off"/>
+    </div>
+    <div class="form-group">
+      <label class="form-label">Mot de passe</label>
+      <div style="position:relative;">
+        <input class="form-input" type="password" id="l-pass" placeholder="••••••••" autocomplete="off" onkeydown="if(event.key==='Enter')doLogin()"/>
+        <button onclick="togglePass()" style="position:absolute;right:12px;top:50%;transform:translateY(-50%);background:none;border:none;color:rgba(255,255,255,.3);cursor:pointer;font-size:.85rem;" id="pass-eye">👁</button>
+      </div>
+    </div>
+    <div class="form-group" style="display:flex;align-items:center;gap:10px;">
+      <input type="checkbox" id="remember" style="accent-color:var(--green);width:15px;height:15px;"/>
+      <label for="remember" style="font-size:.8rem;color:var(--muted);cursor:pointer;">Rester connecté</label>
+    </div>
+    <button class="btn-login" onclick="doLogin()">Se connecter →</button>
+    <div class="attempts-left" id="attempts-msg"></div>
+    <div class="login-shield">🔐 Connexion chiffrée · Accès restreint</div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════
+     ADMIN SCREEN
+══════════════════════════════════════ -->
+<div id="admin-screen">
+
+  <!-- SIDEBAR -->
+  <div class="admin-sidebar">
+    <div class="sidebar-header">
+      <div class="login-logo" style="justify-content:flex-start;">
+        <img src="logo.png" alt="ACDEES" style="height:46px;width:auto;object-fit:contain;"/>
+      </div>
+      <div class="sidebar-badge">⚙️ Admin Panel</div>
+    </div>
+
+    <nav class="sidebar-nav">
+      <div class="nav-section-label">Général</div>
+      <a class="nav-item active" onclick="showTab('dashboard',this)"><span class="nav-icon">📊</span> Tableau de bord</a>
+      <a class="nav-item" onclick="showTab('site-info',this)"><span class="nav-icon">🌐</span> Infos du site</a>
+
+      <div class="nav-section-label" style="margin-top:8px;">Contenu</div>
+      <a class="nav-item" onclick="showTab('fondateur',this)"><span class="nav-icon">👤</span> Fondateur & Équipe</a>
+      <a class="nav-item" onclick="showTab('services-admin',this)"><span class="nav-icon">🏛️</span> Services</a>
+      <a class="nav-item" onclick="showTab('formations-admin',this)"><span class="nav-icon">🎓</span> Formations & Liens</a>
+      <a class="nav-item" onclick="showTab('temoignages',this)"><span class="nav-icon">⭐</span> Témoignages</a>
+      <a class="nav-item" onclick="showTab('blog-admin',this)"><span class="nav-icon">📝</span> Blog & Articles</a>
+      <a class="nav-item" onclick="showTab('stats-admin',this)"><span class="nav-icon">📈</span> Chiffres clés</a>
+
+      <div class="nav-section-label" style="margin-top:8px;">Demandes</div>
+      <a class="nav-item" onclick="showTab('rdv-admin',this)"><span class="nav-icon">📅</span> Rendez-vous <span class="nav-badge" id="rdv-badge">0</span></a>
+      <a class="nav-item" onclick="showTab('devis-admin',this)"><span class="nav-icon">📋</span> Devis <span class="nav-badge" id="devis-badge">0</span></a>
+      <a class="nav-item" onclick="showTab('contacts-admin',this)"><span class="nav-icon">💬</span> Messages <span class="nav-badge" id="msg-badge">0</span></a>
+
+      <div class="nav-section-label" style="margin-top:8px;">Paramètres</div>
+      <a class="nav-item" onclick="showTab('securite',this)"><span class="nav-icon">🔐</span> Sécurité & Accès</a>
+      <a class="nav-item" onclick="showTab('apparence',this)"><span class="nav-icon">🎨</span> Apparence</a>
+    </nav>
+
+    <div class="sidebar-footer">
+      <div class="admin-user">
+        <div class="admin-avatar"><img src="fondateur.png" alt="GMP" onerror="this.style.display='none'"/></div>
+        <div><div class="admin-user-name">G. M. PYRRHUS</div><div class="admin-user-role">Directeur Général</div></div>
+      </div>
+      <button class="btn-logout" onclick="doLogout()">🚪 Déconnexion</button>
+    </div>
+  </div>
+
+  <!-- MAIN -->
+  <div class="admin-main">
+    <div class="admin-topbar">
+      <div class="topbar-title" id="topbar-title">Tableau de bord</div>
+      <div class="topbar-actions">
+        <span class="topbar-time" id="live-time"></span>
+        <a href="index.html" target="_blank" class="btn btn-ghost btn-sm">🌐 Voir le site</a>
+      </div>
+    </div>
+
+    <div class="admin-content">
+
+      <!-- ── DASHBOARD ── -->
+      <div class="admin-tab active" id="tab-dashboard">
+        <div class="grid-4">
+          <div class="stat-card"><div class="s-val" id="d-rdv">0</div><div class="s-label">Demandes de RDV</div><div class="s-trend">↑ Nouvelles demandes</div></div>
+          <div class="stat-card"><div class="s-val" id="d-devis">0</div><div class="s-label">Devis reçus</div><div class="s-trend">↑ Ce mois</div></div>
+          <div class="stat-card"><div class="s-val" id="d-msgs">0</div><div class="s-label">Messages reçus</div><div class="s-trend">À traiter</div></div>
+          <div class="stat-card"><div class="s-val" id="d-formations">0</div><div class="s-label">Formations publiées</div><div class="s-trend">Liens Chariow actifs</div></div>
+        </div>
+
+        <div class="grid-2">
+          <div class="card">
+            <div class="card-header"><span class="card-title">Dernières demandes de RDV</span><button class="btn btn-ghost btn-sm" onclick="showTab('rdv-admin',null)">Voir tout</button></div>
+            <div class="card-body"><div id="dash-rdv-list"><p style="color:var(--muted);font-size:.83rem;">Aucune demande pour le moment.</p></div></div>
+          </div>
+          <div class="card">
+            <div class="card-header"><span class="card-title">Derniers devis</span><button class="btn btn-ghost btn-sm" onclick="showTab('devis-admin',null)">Voir tout</button></div>
+            <div class="card-body"><div id="dash-devis-list"><p style="color:var(--muted);font-size:.83rem;">Aucun devis pour le moment.</p></div></div>
+          </div>
+        </div>
+
+        <div class="card" style="margin-top:24px;">
+          <div class="card-header"><span class="card-title">⚡ Actions rapides</span></div>
+          <div class="card-body" style="display:flex;gap:12px;flex-wrap:wrap;">
+            <button class="btn btn-primary" onclick="showTab('formations-admin',null)">🎓 Gérer les formations</button>
+            <button class="btn btn-gold" onclick="showTab('fondateur',null)">👤 Mettre à jour mon profil</button>
+            <button class="btn btn-ghost" onclick="showTab('temoignages',null)">⭐ Ajouter un témoignage</button>
+            <button class="btn btn-ghost" onclick="showTab('blog-admin',null)">📝 Écrire un article</button>
+            <button class="btn btn-ghost" onclick="showTab('stats-admin',null)">📈 Modifier les chiffres</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- ── INFOS SITE ── -->
+      <div class="admin-tab" id="tab-site-info">
+        <div class="section-title">Informations du site</div>
+        <div class="section-desc">Ces informations apparaissent dans le footer, les pages de contact et les métadonnées.</div>
+        <div class="card">
+          <div class="card-body">
+            <div id="alert-site" class="alert"></div>
+            <div class="f-row">
+              <div class="f-group"><label class="f-label">Nom de l'entreprise</label><input class="f-input" id="si-nom" value="ACDEES"/></div>
+              <div class="f-group"><label class="f-label">Slogan</label><input class="f-input" id="si-slogan" value="Transformons votre vision en une entreprise structurée, performante et rentable."/></div>
+            </div>
+            <div class="f-row">
+              <div class="f-group"><label class="f-label">Téléphone principal</label><input class="f-input" id="si-tel1" value="+225 07 11 61 54 39"/></div>
+              <div class="f-group"><label class="f-label">Téléphone secondaire</label><input class="f-input" id="si-tel2" value="+225 01 71 01 61 41"/></div>
+            </div>
+            <div class="f-row">
+              <div class="f-group"><label class="f-label">Email</label><input class="f-input" id="si-email" value="contact@acdees.ci"/></div>
+              <div class="f-group"><label class="f-label">Adresse</label><input class="f-input" id="si-adresse" value="Abidjan, Côte d'Ivoire"/></div>
+            </div>
+            <div class="f-row">
+              <div class="f-group"><label class="f-label">WhatsApp (lien wa.me)</label><input class="f-input" id="si-wa" value="https://wa.me/2250711615439"/></div>
+              <div class="f-group"><label class="f-label">LinkedIn</label><input class="f-input" id="si-li" value="https://linkedin.com"/></div>
+            </div>
+            <div class="f-row">
+              <div class="f-group"><label class="f-label">Facebook</label><input class="f-input" id="si-fb" placeholder="https://facebook.com/acdees"/></div>
+              <div class="f-group"><label class="f-label">Instagram</label><input class="f-input" id="si-ig" placeholder="https://instagram.com/acdees"/></div>
+            </div>
+            <div style="display:flex;gap:12px;margin-top:8px;">
+              <button class="btn btn-primary" onclick="saveSiteInfo()">💾 Enregistrer</button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ── FONDATEUR ── -->
+      <div class="admin-tab" id="tab-fondateur">
+        <div class="section-title">Fondateur & Profil public</div>
+        <div class="section-desc">Ces informations s'affichent sur la page À propos et dans l'espace client.</div>
+        <div class="card">
+          <div class="card-body">
+            <div id="alert-fondateur" class="alert"></div>
+            <div class="grid-2" style="align-items:start;">
+              <div>
+                <div class="f-row">
+                  <div class="f-group"><label class="f-label">Prénom <span class="req">*</span></label><input class="f-input" id="f-prenom" value="GATA MADJOU"/></div>
+                  <div class="f-group"><label class="f-label">Nom <span class="req">*</span></label><input class="f-input" id="f-nom" value="PYRRHUS"/></div>
+                </div>
+                <div class="f-group"><label class="f-label">Titre / Rôle</label><input class="f-input" id="f-titre" value="CEO & Directeur Stratégique · ACDEES"/></div>
+                <div class="f-group"><label class="f-label">Bio courte (affiché sous photo)</label><textarea class="f-textarea" id="f-bio-short" rows="2">Expert en conseil stratégique, digitalisation et transformation organisationnelle. Passionné par l'entrepreneuriat africain.</textarea></div>
+                <div class="f-group"><label class="f-label">Citation / Mot du fondateur</label><textarea class="f-textarea" id="f-citation" rows="2">"Transformons votre vision en une entreprise structurée, performante et rentable. C'est plus qu'un slogan — c'est notre engagement quotidien."</textarea></div>
+                <div class="f-group"><label class="f-label">Biographie longue (page à propos)</label>
+                  <div class="rich-toolbar">
+                    <button class="rich-btn" onclick="insertTag('f-bio','**','**')"><b>G</b></button>
+                    <button class="rich-btn" onclick="insertTag('f-bio','_','_')"><i>I</i></button>
+                    <button class="rich-btn" onclick="insertTag('f-bio','\n• ','')">Liste</button>
+                  </div>
+                  <textarea class="f-textarea rich-area" id="f-bio" rows="6">L'idée d'ACDEES est née d'une frustration constructive. J'ai observé pendant des années des entrepreneurs talentueux, des idées brillantes, des marchés immenses — et pourtant, des entreprises qui stagnaient ou échouaient faute de structure, de méthode et d'outils adaptés.</textarea>
+                </div>
+                <div class="f-group"><label class="f-label">LinkedIn personnel</label><input class="f-input" id="f-linkedin" placeholder="https://linkedin.com/in/..."/></div>
+              </div>
+              <div>
+                <div class="f-group"><label class="f-label">Photo de profil actuelle</label>
+                  <div style="text-align:center;padding:20px;background:rgba(255,255,255,.03);border:1px solid var(--border);border-radius:10px;">
+                    <img src="fondateur.png" id="founder-preview" style="width:140px;height:140px;border-radius:50%;object-fit:cover;border:3px solid var(--gold);display:block;margin:0 auto 14px;"/>
+                    <div style="font-size:.85rem;font-weight:500;" id="founder-name-preview">GATA MADJOU PYRRHUS</div>
+                    <div style="font-size:.72rem;color:var(--gold);margin-top:4px;">CEO & Directeur Stratégique</div>
+                  </div>
+                </div>
+                <div class="f-group"><label class="f-label">Remplacer la photo</label>
+                  <div class="img-upload" onclick="document.getElementById('founder-file').click()">
+                    <div class="img-upload-icon">📷</div>
+                    <div class="img-upload-text">Cliquer pour choisir une photo<br/><span style="font-size:.72rem;color:rgba(255,255,255,.25);">JPG, PNG · Max 2 MB</span></div>
+                  </div>
+                  <input type="file" id="founder-file" accept="image/*" style="display:none;" onchange="previewFounderPhoto(this)"/>
+                </div>
+              </div>
+            </div>
+            <div style="display:flex;gap:12px;margin-top:16px;">
+              <button class="btn btn-primary" onclick="saveFondateur()">💾 Enregistrer le profil</button>
+              <button class="btn btn-ghost" onclick="previewPage('apropos.html')">👁 Voir la page À propos</button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ── SERVICES ── -->
+      <div class="admin-tab" id="tab-services-admin">
+        <div class="section-title">Gestion des services</div>
+        <div class="section-desc">Modifier les titres, descriptions et statuts de vos 8 services.</div>
+        <div id="services-list"></div>
+        <button class="btn btn-primary" onclick="saveServices()" style="margin-top:20px;">💾 Enregistrer tous les services</button>
+      </div>
+
+      <!-- ── FORMATIONS ── -->
+      <div class="admin-tab" id="tab-formations-admin">
+        <div class="section-title">Formations & Liens Chariow</div>
+        <div class="section-desc">Gérez vos formations et entrez les liens Chariow. Les visiteurs seront redirigés automatiquement.</div>
+        <div id="alert-forma" class="alert"></div>
+
+        <div class="card" style="margin-bottom:24px;">
+          <div class="card-header"><span class="card-title">➕ Ajouter une formation</span></div>
+          <div class="card-body">
+            <div class="f-row">
+              <div class="f-group"><label class="f-label">Titre <span class="req">*</span></label><input class="f-input" id="nf-title" placeholder="Nom de la formation"/></div>
+              <div class="f-group"><label class="f-label">Catégorie</label>
+                <select class="f-select" id="nf-cat">
+                  <option value="ia">Intelligence Artificielle</option>
+                  <option value="marketing">Marketing</option>
+                  <option value="entrepreneuriat">Entrepreneuriat</option>
+                  <option value="vente">Vente</option>
+                  <option value="leadership">Leadership</option>
+                  <option value="communication">Communication</option>
+                </select>
+              </div>
+            </div>
+            <div class="f-group"><label class="f-label">Description</label><textarea class="f-textarea" id="nf-desc" rows="2" placeholder="Décrivez la formation..."></textarea></div>
+            <div class="f-row-3">
+              <div class="f-group"><label class="f-label">Prix (ex: 75 000 FCFA)</label><input class="f-input" id="nf-prix" placeholder="75 000 FCFA"/></div>
+              <div class="f-group"><label class="f-label">Durée</label><input class="f-input" id="nf-duree" placeholder="6h de contenu"/></div>
+              <div class="f-group"><label class="f-label">Niveau</label>
+                <select class="f-select" id="nf-niveau">
+                  <option>Débutant</option><option>Intermédiaire</option><option>Avancé</option><option>Tous niveaux</option>
+                </select>
+              </div>
+            </div>
+            <div class="f-group"><label class="f-label">🔗 Lien Chariow <span class="req">*</span></label><input class="f-input" id="nf-link" placeholder="https://chariow.com/formation/..."/><div class="f-note">URL complète vers la formation sur la plateforme Chariow</div></div>
+            <div class="f-row">
+              <div class="f-group"><label class="f-label">Modules</label><input class="f-input" id="nf-modules" placeholder="8 modules"/></div>
+              <div class="f-group" style="display:flex;align-items:flex-end;padding-bottom:4px;">
+                <div class="toggle-wrap">
+                  <label class="toggle"><input type="checkbox" id="nf-popular"/><span class="toggle-slider"></span></label>
+                  <span class="toggle-label">Marquer comme "Populaire ⭐"</span>
+                </div>
+              </div>
+            </div>
+            <button class="btn btn-primary" onclick="addFormation()">➕ Ajouter la formation</button>
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="card-header"><span class="card-title">Formations existantes — Liens Chariow</span><span id="forma-count" style="font-size:.75rem;color:var(--muted);">12 formations</span></div>
+          <div class="card-body">
+            <div id="formations-table-wrap"></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ── TÉMOIGNAGES ── -->
+      <div class="admin-tab" id="tab-temoignages">
+        <div class="section-title">Témoignages clients</div>
+        <div class="section-desc">Ajoutez, modifiez ou supprimez les avis de vos clients. Ils s'affichent sur la page d'accueil.</div>
+        <div class="card" style="margin-bottom:24px;">
+          <div class="card-header"><span class="card-title">➕ Nouveau témoignage</span></div>
+          <div class="card-body">
+            <div id="alert-testi" class="alert"></div>
+            <div class="f-row">
+              <div class="f-group"><label class="f-label">Nom du client <span class="req">*</span></label><input class="f-input" id="t-nom" placeholder="Konan Didier"/></div>
+              <div class="f-group"><label class="f-label">Rôle / Entreprise</label><input class="f-input" id="t-role" placeholder="CEO — Mon Entreprise"/></div>
+            </div>
+            <div class="f-group"><label class="f-label">Témoignage <span class="req">*</span></label><textarea class="f-textarea" id="t-texte" rows="3" placeholder="Le témoignage du client..."></textarea></div>
+            <div class="f-row">
+              <div class="f-group"><label class="f-label">Note</label>
+                <select class="f-select" id="t-note"><option>★★★★★</option><option>★★★★</option><option>★★★</option></select>
+              </div>
+              <div class="f-group" style="display:flex;align-items:flex-end;padding-bottom:4px;">
+                <div class="toggle-wrap">
+                  <label class="toggle"><input type="checkbox" id="t-visible" checked/><span class="toggle-slider"></span></label>
+                  <span class="toggle-label">Visible sur le site</span>
+                </div>
+              </div>
+            </div>
+            <button class="btn btn-primary" onclick="addTemoignage()">➕ Ajouter le témoignage</button>
+          </div>
+        </div>
+        <div class="card">
+          <div class="card-header"><span class="card-title">Témoignages publiés</span></div>
+          <div class="card-body"><div id="testi-list"></div></div>
+        </div>
+      </div>
+
+      <!-- ── BLOG ── -->
+      <div class="admin-tab" id="tab-blog-admin">
+        <div class="section-title">Blog & Articles</div>
+        <div class="section-desc">Rédigez et publiez vos articles. Ils apparaissent sur la page Blog.</div>
+        <div class="card" style="margin-bottom:24px;">
+          <div class="card-header"><span class="card-title">✍️ Nouvel article</span></div>
+          <div class="card-body">
+            <div id="alert-blog" class="alert"></div>
+            <div class="f-group"><label class="f-label">Titre de l'article <span class="req">*</span></label><input class="f-input" id="b-titre" placeholder="Comment l'IA va transformer votre entreprise..."/></div>
+            <div class="f-row">
+              <div class="f-group"><label class="f-label">Catégorie</label>
+                <select class="f-select" id="b-cat">
+                  <option value="digital">Digitalisation</option><option value="ia">Intelligence Artificielle</option>
+                  <option value="marketing">Marketing</option><option value="entrepreneuriat">Entrepreneuriat</option>
+                  <option value="leadership">Leadership</option><option value="productivite">Productivité</option>
+                </select>
+              </div>
+              <div class="f-group"><label class="f-label">Temps de lecture</label><input class="f-input" id="b-temps" placeholder="5 min"/></div>
+            </div>
+            <div class="f-group"><label class="f-label">Résumé / Introduction <span class="req">*</span></label><textarea class="f-textarea" id="b-desc" rows="2" placeholder="Introduction courte qui apparaît dans la liste des articles..."></textarea></div>
+            <div class="f-group"><label class="f-label">Contenu complet de l'article</label>
+              <div class="rich-toolbar">
+                <button class="rich-btn" onclick="insertTag('b-contenu','## ','')">H2</button>
+                <button class="rich-btn" onclick="insertTag('b-contenu','### ','')">H3</button>
+                <button class="rich-btn" onclick="insertTag('b-contenu','**','**')"><b>G</b></button>
+                <button class="rich-btn" onclick="insertTag('b-contenu','_','_')"><i>I</i></button>
+                <button class="rich-btn" onclick="insertTag('b-contenu','\n• ','')">• Liste</button>
+                <button class="rich-btn" onclick="insertTag('b-contenu','\n> ','')">Citation</button>
+              </div>
+              <textarea class="f-textarea rich-area" id="b-contenu" rows="10" placeholder="Rédigez le contenu complet de votre article ici..."></textarea>
+            </div>
+            <div class="f-row">
+              <div class="f-group" style="display:flex;align-items:flex-end;padding-bottom:4px;">
+                <div class="toggle-wrap">
+                  <label class="toggle"><input type="checkbox" id="b-featured"/><span class="toggle-slider"></span></label>
+                  <span class="toggle-label">Article à la une</span>
+                </div>
+              </div>
+              <div class="f-group" style="display:flex;align-items:flex-end;padding-bottom:4px;">
+                <div class="toggle-wrap">
+                  <label class="toggle"><input type="checkbox" id="b-publie" checked/><span class="toggle-slider"></span></label>
+                  <span class="toggle-label">Publier immédiatement</span>
+                </div>
+              </div>
+            </div>
+            <button class="btn btn-primary" onclick="addArticle()">📢 Publier l'article</button>
+          </div>
+        </div>
+        <div class="card">
+          <div class="card-header"><span class="card-title">Articles publiés</span></div>
+          <div class="card-body"><div id="articles-list"></div></div>
+        </div>
+      </div>
+
+      <!-- ── STATS ── -->
+      <div class="admin-tab" id="tab-stats-admin">
+        <div class="section-title">Chiffres clés</div>
+        <div class="section-desc">Ces chiffres s'affichent sur la page d'accueil et la page À propos.</div>
+        <div class="card">
+          <div class="card-body">
+            <div id="alert-stats" class="alert"></div>
+            <div class="f-row">
+              <div class="f-group"><label class="f-label">Entreprises accompagnées</label><input class="f-input" id="st-entreprises" value="100" type="number"/><div class="f-note">Affiché : "+100 entreprises"</div></div>
+              <div class="f-group"><label class="f-label">Heures de conseil</label><input class="f-input" id="st-heures" value="500" type="number"/><div class="f-note">Affiché : "+500h de conseil"</div></div>
+            </div>
+            <div class="f-row">
+              <div class="f-group"><label class="f-label">Taux de satisfaction (%)</label><input class="f-input" id="st-satisfaction" value="95" type="number" min="0" max="100"/><div class="f-note">Affiché : "95%"</div></div>
+              <div class="f-group"><label class="f-label">Projets digitaux réalisés</label><input class="f-input" id="st-projets" value="50" type="number"/><div class="f-note">Affiché : "+50 projets"</div></div>
+            </div>
+            <div style="display:flex;gap:12px;margin-top:8px;">
+              <button class="btn btn-primary" onclick="saveStats()">💾 Enregistrer les chiffres</button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ── RDV ── -->
+      <div class="admin-tab" id="tab-rdv-admin">
+        <div class="section-title">Demandes de rendez-vous</div>
+        <div class="section-desc">Toutes les demandes reçues via le formulaire de diagnostic.</div>
+        <div class="card">
+          <div class="card-body">
+            <div id="rdv-table-wrap"><p style="color:var(--muted);font-size:.84rem;">Aucune demande de rendez-vous pour le moment.</p></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ── DEVIS ── -->
+      <div class="admin-tab" id="tab-devis-admin">
+        <div class="section-title">Demandes de devis</div>
+        <div class="section-desc">Toutes les demandes de devis reçues.</div>
+        <div class="card">
+          <div class="card-body">
+            <div id="devis-table-wrap"><p style="color:var(--muted);font-size:.84rem;">Aucune demande de devis pour le moment.</p></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ── MESSAGES ── -->
+      <div class="admin-tab" id="tab-contacts-admin">
+        <div class="section-title">Messages de contact</div>
+        <div class="section-desc">Tous les messages reçus via le formulaire de contact.</div>
+        <div class="card">
+          <div class="card-body">
+            <div id="msgs-table-wrap"><p style="color:var(--muted);font-size:.84rem;">Aucun message pour le moment.</p></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ── SÉCURITÉ ── -->
+      <div class="admin-tab" id="tab-securite">
+        <div class="section-title">Sécurité & Accès</div>
+        <div class="section-desc">Modifiez vos identifiants de connexion à l'administration.</div>
+        <div class="card">
+          <div class="card-body">
+            <div id="alert-secu" class="alert"></div>
+            <div class="f-group"><label class="f-label">Nouvel identifiant</label><input class="f-input" id="new-user" placeholder="Nouvel identifiant"/></div>
+            <div class="f-group"><label class="f-label">Mot de passe actuel <span class="req">*</span></label><input class="f-input" type="password" id="old-pass" placeholder="••••••••"/></div>
+            <div class="f-row">
+              <div class="f-group"><label class="f-label">Nouveau mot de passe</label><input class="f-input" type="password" id="new-pass" placeholder="Minimum 8 caractères"/></div>
+              <div class="f-group"><label class="f-label">Confirmer le nouveau mot de passe</label><input class="f-input" type="password" id="confirm-pass" placeholder="Répéter le mot de passe"/></div>
+            </div>
+            <div style="background:rgba(212,175,55,.06);border:1px solid var(--border-gold);border-radius:10px;padding:16px;margin-bottom:20px;">
+              <div style="font-size:.75rem;color:var(--gold);font-weight:500;margin-bottom:8px;">⚠️ Conseils de sécurité</div>
+              <ul style="font-size:.78rem;color:var(--muted);line-height:1.8;padding-left:16px;">
+                <li>Utilisez au moins 10 caractères avec majuscules, chiffres et symboles</li>
+                <li>Ne partagez jamais vos identifiants</li>
+                <li>Changez votre mot de passe régulièrement</li>
+              </ul>
+            </div>
+            <button class="btn btn-primary" onclick="changeCredentials()">🔐 Mettre à jour les identifiants</button>
+          </div>
+        </div>
+
+        <div class="card" style="margin-top:24px;">
+          <div class="card-header"><span class="card-title">Historique des connexions</span></div>
+          <div class="card-body">
+            <div id="login-history"></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ── APPARENCE ── -->
+      <div class="admin-tab" id="tab-apparence">
+        <div class="section-title">Apparence du site</div>
+        <div class="section-desc">Personnalisez les couleurs et l'aspect visuel de votre site.</div>
+        <div class="card">
+          <div class="card-body">
+            <div id="alert-app" class="alert"></div>
+            <div class="f-row">
+              <div class="f-group"><label class="f-label">Couleur principale (Vert)</label><div class="color-row"><input type="color" id="c-green" value="#1F7A3D"/><input class="f-input" id="c-green-hex" value="#1F7A3D" style="flex:1;" oninput="syncColor('c-green','c-green-hex')"/></div></div>
+              <div class="f-group"><label class="f-label">Couleur secondaire (Or)</label><div class="color-row"><input type="color" id="c-gold" value="#D4AF37"/><input class="f-input" id="c-gold-hex" value="#D4AF37" style="flex:1;" oninput="syncColor('c-gold','c-gold-hex')"/></div></div>
+            </div>
+            <div class="f-row">
+              <div class="f-group"><label class="f-label">Fond sombre</label><div class="color-row"><input type="color" id="c-navy" value="#0B1320"/><input class="f-input" id="c-navy-hex" value="#0B1320" style="flex:1;"/></div></div>
+              <div class="f-group"><label class="f-label">Surface</label><div class="color-row"><input type="color" id="c-surface" value="#162035"/><input class="f-input" id="c-surface-hex" value="#162035" style="flex:1;"/></div></div>
+            </div>
+            <div style="background:rgba(255,255,255,.03);border:1px solid var(--border);border-radius:10px;padding:20px;margin-bottom:20px;">
+              <div style="font-size:.78rem;color:var(--muted);margin-bottom:12px;">Aperçu des couleurs :</div>
+              <div style="display:flex;gap:10px;flex-wrap:wrap;">
+                <div style="width:60px;height:36px;border-radius:6px;background:#1F7A3D;display:flex;align-items:center;justify-content:center;font-size:.65rem;color:white;">Vert</div>
+                <div style="width:60px;height:36px;border-radius:6px;background:#D4AF37;display:flex;align-items:center;justify-content:center;font-size:.65rem;color:#0B1320;">Or</div>
+                <div style="width:60px;height:36px;border-radius:6px;background:#0B1320;display:flex;align-items:center;justify-content:center;font-size:.65rem;color:white;border:1px solid rgba(255,255,255,.1);">Fond</div>
+                <div style="width:60px;height:36px;border-radius:6px;background:#162035;display:flex;align-items:center;justify-content:center;font-size:.65rem;color:white;">Surface</div>
+              </div>
+            </div>
+            <button class="btn btn-primary" onclick="saveAppearance()">💾 Appliquer les couleurs</button>
+          </div>
+        </div>
+      </div>
+
+    </div><!-- /admin-content -->
+  </div><!-- /admin-main -->
+</div><!-- /admin-screen -->
+
+<div id="toast" class="toast"><span class="toast-icon" id="toast-icon">✅</span><span id="toast-msg"></span></div>
+
+<script>
+// ══════════════════════════════════════════
+// CONFIGURATION — CHANGER ICI
+// ══════════════════════════════════════════
+const ADMIN_CONFIG = {
+  defaultUser: 'gata.pyrrhus',
+  defaultPass: 'ACDEES@2025!',
+  maxAttempts: 5,
+  lockDuration: 60 // secondes
+};
+
+// ── STORAGE KEYS ──
+const KEYS = {
+  creds: 'acdees_admin_creds',
+  session: 'acdees_admin_session',
+  siteInfo: 'acdees_site_info',
+  fondateur: 'acdees_fondateur',
+  stats: 'acdees_stats',
+  formations: 'acdees_formations',
+  temoignages: 'acdees_temoignages',
+  articles: 'acdees_articles',
+  services: 'acdees_services',
+  loginLog: 'acdees_login_log',
+  attempts: 'acdees_attempts',
+  lockUntil: 'acdees_lock_until'
+};
+
+// ── INIT CREDENTIALS ──
+function getCreds() {
+  const stored = localStorage.getItem(KEYS.creds);
+  return stored ? JSON.parse(stored) : { user: ADMIN_CONFIG.defaultUser, pass: ADMIN_CONFIG.defaultPass };
+}
+
+// ── SECURITY: LOGIN ──
+let attemptCount = parseInt(localStorage.getItem(KEYS.attempts) || '0');
+
+function checkLock() {
+  const lockUntil = parseInt(localStorage.getItem(KEYS.lockUntil) || '0');
+  if (lockUntil > Date.now()) {
+    document.getElementById('locked-msg').style.display = 'block';
+    document.getElementById('login-alert').style.display = 'none';
+    startCountdown(Math.ceil((lockUntil - Date.now()) / 1000));
+    return true;
+  }
+  document.getElementById('locked-msg').style.display = 'none';
+  return false;
+}
+
+function startCountdown(secs) {
+  let s = secs;
+  document.getElementById('countdown').textContent = s;
+  const t = setInterval(() => {
+    s--;
+    document.getElementById('countdown').textContent = s;
+    if (s <= 0) {
+      clearInterval(t);
+      localStorage.removeItem(KEYS.lockUntil);
+      localStorage.setItem(KEYS.attempts, '0');
+      attemptCount = 0;
+      document.getElementById('locked-msg').style.display = 'none';
+    }
+  }, 1000);
+}
+
+function doLogin() {
+  if (checkLock()) return;
+  const user = document.getElementById('l-user').value.trim();
+  const pass = document.getElementById('l-pass').value;
+  const creds = getCreds();
+
+  if (user === creds.user && pass === creds.pass) {
+    // Success
+    localStorage.setItem(KEYS.attempts, '0');
+    localStorage.removeItem(KEYS.lockUntil);
+    attemptCount = 0;
+    const remember = document.getElementById('remember').checked;
+    const session = { user, time: Date.now(), remember };
+    localStorage.setItem(KEYS.session, JSON.stringify(session));
+    // Log
+    const log = JSON.parse(localStorage.getItem(KEYS.loginLog) || '[]');
+    log.unshift({ time: new Date().toLocaleString('fr-FR'), user, ip: '—', status: 'Succès' });
+    localStorage.setItem(KEYS.loginLog, JSON.stringify(log.slice(0,20)));
+    openAdmin();
+  } else {
+    attemptCount++;
+    localStorage.setItem(KEYS.attempts, attemptCount);
+    const remaining = ADMIN_CONFIG.maxAttempts - attemptCount;
+    // Log
+    const log = JSON.parse(localStorage.getItem(KEYS.loginLog) || '[]');
+    log.unshift({ time: new Date().toLocaleString('fr-FR'), user: user || '—', ip: '—', status: 'Échec' });
+    localStorage.setItem(KEYS.loginLog, JSON.stringify(log.slice(0,20)));
+
+    if (attemptCount >= ADMIN_CONFIG.maxAttempts) {
+      const lockUntil = Date.now() + ADMIN_CONFIG.lockDuration * 1000;
+      localStorage.setItem(KEYS.lockUntil, lockUntil);
+      checkLock();
+    } else {
+      const a = document.getElementById('login-alert');
+      a.textContent = `❌ Identifiants incorrects. ${remaining} tentative${remaining > 1 ? 's' : ''} restante${remaining > 1 ? 's' : ''}.`;
+      a.style.display = 'block';
+      document.getElementById('attempts-msg').textContent = `Tentative ${attemptCount}/${ADMIN_CONFIG.maxAttempts}`;
+      document.getElementById('l-pass').value = '';
+    }
+  }
+}
+
+function togglePass() {
+  const p = document.getElementById('l-pass');
+  p.type = p.type === 'password' ? 'text' : 'password';
+}
+
+function openAdmin() {
+  document.getElementById('login-screen').style.display = 'none';
+  document.getElementById('admin-screen').style.display = 'block';
+  initAdmin();
+}
+
+function doLogout() {
+  localStorage.removeItem(KEYS.session);
+  document.getElementById('admin-screen').style.display = 'none';
+  document.getElementById('login-screen').style.display = 'flex';
+  document.getElementById('l-pass').value = '';
+  document.getElementById('l-user').value = '';
+}
+
+// ── CHECK SESSION ──
+window.addEventListener('load', () => {
+  checkLock();
+  const session = localStorage.getItem(KEYS.session);
+  if (session) {
+    const s = JSON.parse(session);
+    // Session valid for 8h or if remember
+    const maxAge = s.remember ? 30*24*60*60*1000 : 8*60*60*1000;
+    if (Date.now() - s.time < maxAge) { openAdmin(); return; }
+  }
+  // Update live time on login screen
+  updateTime();
+});
+
+// ── ADMIN INIT ──
+function initAdmin() {
+  updateTime();
+  setInterval(updateTime, 1000);
+  loadDashboard();
+  loadFormationsTable();
+  loadTemoignages();
+  loadArticles();
+  loadServicesAdmin();
+  loadSiteInfo();
+  loadStats();
+  loadFondateur();
+  loadLoginHistory();
+  loadSubmissions();
+}
+
+function updateTime() {
+  const el = document.getElementById('live-time');
+  if (el) el.textContent = new Date().toLocaleString('fr-FR');
+}
+
+// ── TAB NAVIGATION ──
+function showTab(id, el) {
+  document.querySelectorAll('.admin-tab').forEach(t => t.classList.remove('active'));
+  document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+  document.getElementById('tab-' + id)?.classList.add('active');
+  if (el) el.classList.add('active');
+  const titles = {
+    'dashboard':'Tableau de bord','site-info':'Informations du site','fondateur':'Fondateur & Profil',
+    'services-admin':'Services','formations-admin':'Formations & Liens Chariow',
+    'temoignages':'Témoignages','blog-admin':'Blog & Articles','stats-admin':'Chiffres clés',
+    'rdv-admin':'Demandes de RDV','devis-admin':'Devis reçus','contacts-admin':'Messages',
+    'securite':'Sécurité & Accès','apparence':'Apparence'
+  };
+  document.getElementById('topbar-title').textContent = titles[id] || id;
+}
+
+// ── TOAST ──
+function toast(msg, ok=true) {
+  const t = document.getElementById('toast');
+  document.getElementById('toast-icon').textContent = ok ? '✅' : '❌';
+  document.getElementById('toast-msg').textContent = msg;
+  t.className = 'toast show' + (ok ? '' : ' error');
+  setTimeout(() => t.className = 'toast', 3500);
+}
+
+// ── ALERT HELPERS ──
+function showAlert(id, msg, ok) {
+  const a = document.getElementById(id);
+  a.textContent = msg;
+  a.className = 'alert ' + (ok ? 'alert-ok' : 'alert-err');
+  a.style.display = 'block';
+  setTimeout(() => a.style.display = 'none', 4000);
+}
+
+// ── RICH TEXT ──
+function insertTag(id, before, after) {
+  const ta = document.getElementById(id);
+  const s = ta.selectionStart, e = ta.selectionEnd;
+  const sel = ta.value.substring(s, e);
+  ta.value = ta.value.substring(0, s) + before + sel + after + ta.value.substring(e);
+  ta.focus();
+}
+
+// ── SITE INFO ──
+function loadSiteInfo() {
+  const d = JSON.parse(localStorage.getItem(KEYS.siteInfo) || '{}');
+  if (d.tel1) document.getElementById('si-tel1').value = d.tel1;
+  if (d.tel2) document.getElementById('si-tel2').value = d.tel2;
+  if (d.email) document.getElementById('si-email').value = d.email;
+  if (d.adresse) document.getElementById('si-adresse').value = d.adresse;
+  if (d.wa) document.getElementById('si-wa').value = d.wa;
+  if (d.li) document.getElementById('si-li').value = d.li;
+  if (d.fb) document.getElementById('si-fb').value = d.fb;
+  if (d.ig) document.getElementById('si-ig').value = d.ig;
+  if (d.slogan) document.getElementById('si-slogan').value = d.slogan;
+}
+function saveSiteInfo() {
+  const data = {
+    nom: document.getElementById('si-nom').value,
+    slogan: document.getElementById('si-slogan').value,
+    tel1: document.getElementById('si-tel1').value,
+    tel2: document.getElementById('si-tel2').value,
+    email: document.getElementById('si-email').value,
+    adresse: document.getElementById('si-adresse').value,
+    wa: document.getElementById('si-wa').value,
+    li: document.getElementById('si-li').value,
+    fb: document.getElementById('si-fb').value,
+    ig: document.getElementById('si-ig').value
+  };
+  localStorage.setItem(KEYS.siteInfo, JSON.stringify(data));
+  showAlert('alert-site', '✅ Informations enregistrées avec succès.', true);
+  toast('Informations du site sauvegardées');
+}
+
+// ── FONDATEUR ──
+function loadFondateur() {
+  const d = JSON.parse(localStorage.getItem(KEYS.fondateur) || '{}');
+  if (d.prenom) document.getElementById('f-prenom').value = d.prenom;
+  if (d.nom) document.getElementById('f-nom').value = d.nom;
+  if (d.titre) document.getElementById('f-titre').value = d.titre;
+  if (d.bio_short) document.getElementById('f-bio-short').value = d.bio_short;
+  if (d.citation) document.getElementById('f-citation').value = d.citation;
+  if (d.bio) document.getElementById('f-bio').value = d.bio;
+  if (d.linkedin) document.getElementById('f-linkedin').value = d.linkedin;
+}
+function saveFondateur() {
+  const prenom = document.getElementById('f-prenom').value.trim();
+  const nom = document.getElementById('f-nom').value.trim();
+  if (!prenom || !nom) return showAlert('alert-fondateur', 'Le nom et prénom sont requis.', false);
+  const data = {
+    prenom, nom,
+    titre: document.getElementById('f-titre').value,
+    bio_short: document.getElementById('f-bio-short').value,
+    citation: document.getElementById('f-citation').value,
+    bio: document.getElementById('f-bio').value,
+    linkedin: document.getElementById('f-linkedin').value
+  };
+  localStorage.setItem(KEYS.fondateur, JSON.stringify(data));
+  document.getElementById('founder-name-preview').textContent = prenom + ' ' + nom;
+  showAlert('alert-fondateur', '✅ Profil du fondateur mis à jour.', true);
+  toast('Profil enregistré');
+}
+function previewFounderPhoto(input) {
+  if (input.files && input.files[0]) {
+    const reader = new FileReader();
+    reader.onload = e => {
+      document.getElementById('founder-preview').src = e.target.result;
+      toast('Photo mise à jour dans l\'aperçu');
+    };
+    reader.readAsDataURL(input.files[0]);
+  }
+}
+
+// ── STATS ──
+function loadStats() {
+  const d = JSON.parse(localStorage.getItem(KEYS.stats) || '{}');
+  if (d.entreprises) document.getElementById('st-entreprises').value = d.entreprises;
+  if (d.heures) document.getElementById('st-heures').value = d.heures;
+  if (d.satisfaction) document.getElementById('st-satisfaction').value = d.satisfaction;
+  if (d.projets) document.getElementById('st-projets').value = d.projets;
+}
+function saveStats() {
+  const data = {
+    entreprises: document.getElementById('st-entreprises').value,
+    heures: document.getElementById('st-heures').value,
+    satisfaction: document.getElementById('st-satisfaction').value,
+    projets: document.getElementById('st-projets').value
+  };
+  localStorage.setItem(KEYS.stats, JSON.stringify(data));
+  showAlert('alert-stats', '✅ Chiffres clés enregistrés.', true);
+  toast('Statistiques sauvegardées');
+}
+
+// ── FORMATIONS ──
+const DEFAULT_FORMATIONS = [
+  {id:'f001',cat:'ia',title:'Maîtriser l\'IA pour son Entreprise',prix:'75 000 FCFA',duree:'6h',niveau:'Débutant',modules:'8 modules',popular:true,chariow:''},
+  {id:'f002',cat:'ia',title:'Créer son Chatbot IA sans Coder',prix:'90 000 FCFA',duree:'8h',niveau:'Intermédiaire',modules:'10 modules',popular:false,chariow:''},
+  {id:'f003',cat:'marketing',title:'Publicité Facebook & Instagram Avancée',prix:'60 000 FCFA',duree:'5h',niveau:'Intermédiaire',modules:'7 modules',popular:true,chariow:''},
+  {id:'f004',cat:'marketing',title:'Content Marketing & Personal Branding',prix:'50 000 FCFA',duree:'4h',niveau:'Débutant',modules:'6 modules',popular:false,chariow:''},
+  {id:'f005',cat:'entrepreneuriat',title:'Structurer et Scaler son Business',prix:'90 000 FCFA',duree:'10h',niveau:'Intermédiaire',modules:'12 modules',popular:true,chariow:''},
+  {id:'f006',cat:'entrepreneuriat',title:'Lancer son Business en 30 Jours',prix:'45 000 FCFA',duree:'30 jours',niveau:'Débutant',modules:'30 sessions',popular:false,chariow:''},
+  {id:'f007',cat:'vente',title:'Techniques de Vente & Closing',prix:'55 000 FCFA',duree:'5h',niveau:'Tous niveaux',modules:'6 modules',popular:false,chariow:''},
+  {id:'f008',cat:'vente',title:'Tunnels de Vente & Automatisation',prix:'80 000 FCFA',duree:'7h',niveau:'Avancé',modules:'9 modules',popular:false,chariow:''},
+  {id:'f009',cat:'leadership',title:'Leadership & Management d\'Équipe',prix:'70 000 FCFA',duree:'6h',niveau:'Intermédiaire',modules:'8 modules',popular:false,chariow:''},
+  {id:'f010',cat:'communication',title:'Prise de Parole & Communication Impactante',prix:'50 000 FCFA',duree:'4h',niveau:'Tous niveaux',modules:'5 modules',popular:false,chariow:''},
+  {id:'f011',cat:'marketing',title:'TikTok Marketing pour les Pros',prix:'40 000 FCFA',duree:'3h',niveau:'Débutant',modules:'5 modules',popular:false,chariow:''},
+  {id:'f012',cat:'ia',title:'Automatisation IA avec Make & n8n',prix:'95 000 FCFA',duree:'9h',niveau:'Avancé',modules:'11 modules',popular:false,chariow:''}
+];
+
+function getFormations() {
+  const stored = localStorage.getItem(KEYS.formations);
+  if (stored) {
+    const links = JSON.parse(stored);
+    return DEFAULT_FORMATIONS.map(f => ({ ...f, ...(links[f.id] || {}) }));
+  }
+  return DEFAULT_FORMATIONS;
+}
+
+function saveFormationLinks() {
+  const formations = getFormations();
+  const links = {};
+  formations.forEach(f => {
+    const el = document.getElementById('fl-' + f.id);
+    const pop = document.getElementById('fp-' + f.id);
+    const act = document.getElementById('fa-' + f.id);
+    links[f.id] = {
+      chariow: el ? el.value.trim() : f.chariow,
+      popular: pop ? pop.checked : f.popular,
+      active: act ? act.checked : true
+    };
+  });
+  localStorage.setItem(KEYS.formations, JSON.stringify(links));
+  toast('Liens Chariow sauvegardés ✅');
+  showAlert('alert-forma', '✅ Tous les liens ont été enregistrés.', true);
+  updateDashboardCounts();
+}
+
+function addFormation() {
+  const title = document.getElementById('nf-title').value.trim();
+  const chariow = document.getElementById('nf-link').value.trim();
+  if (!title) return showAlert('alert-forma', 'Le titre est requis.', false);
+  if (!chariow) return showAlert('alert-forma', 'Le lien Chariow est requis.', false);
+
+  const stored = JSON.parse(localStorage.getItem(KEYS.formations) || '{}');
+  const id = 'f' + Date.now();
+  stored[id] = {
+    id, chariow, popular: document.getElementById('nf-popular').checked,
+    cat: document.getElementById('nf-cat').value,
+    title, desc: document.getElementById('nf-desc').value,
+    prix: document.getElementById('nf-prix').value,
+    duree: document.getElementById('nf-duree').value,
+    niveau: document.getElementById('nf-niveau').value,
+    modules: document.getElementById('nf-modules').value,
+    custom: true, active: true
+  };
+  localStorage.setItem(KEYS.formations, JSON.stringify(stored));
+  ['nf-title','nf-desc','nf-prix','nf-duree','nf-modules','nf-link'].forEach(id => document.getElementById(id).value = '');
+  loadFormationsTable();
+  toast('Formation ajoutée avec succès');
+}
+
+function loadFormationsTable() {
+  const formations = getFormations();
+  const active = formations.filter(f => f.chariow).length;
+  document.getElementById('forma-count').textContent = `${formations.length} formations · ${active} liens actifs`;
+  document.getElementById('d-formations').textContent = active;
+
+  const html = `<table class="admin-table">
+    <thead><tr>
+      <th>Formation</th><th>Catégorie</th><th>Prix</th>
+      <th style="min-width:300px;">🔗 Lien Chariow</th>
+      <th>Populaire</th><th>Actif</th><th></th>
+    </tr></thead>
+    <tbody>
+    ${formations.map(f => `
+      <tr>
+        <td style="max-width:200px;"><div style="font-size:.83rem;color:var(--white);line-height:1.3;">${f.title}</div><div style="font-size:.7rem;color:var(--muted);margin-top:2px;">${f.duree} · ${f.niveau}</div></td>
+        <td><span class="pill pill-gray">${f.cat}</span></td>
+        <td style="white-space:nowrap;">${f.prix}</td>
+        <td>
+          <input class="f-input" id="fl-${f.id}" value="${f.chariow||''}" placeholder="https://chariow.com/..." style="font-size:.78rem;padding:8px 12px;"/>
+          ${f.chariow ? '<div style="font-size:.65rem;color:#6ee7a0;margin-top:3px;">✓ Lien actif</div>' : '<div style="font-size:.65rem;color:rgba(255,255,255,.25);margin-top:3px;">Pas de lien</div>'}
+        </td>
+        <td><label class="toggle"><input type="checkbox" id="fp-${f.id}" ${f.popular?'checked':''}/><span class="toggle-slider"></span></label></td>
+        <td><label class="toggle"><input type="checkbox" id="fa-${f.id}" ${f.active!==false?'checked':''}/><span class="toggle-slider"></span></label></td>
+        <td><button class="btn btn-sm btn-ghost" onclick="saveSingleLink('${f.id}')">💾</button></td>
+      </tr>`).join('')}
+    </tbody>
+  </table>
+  <div style="margin-top:20px;display:flex;gap:12px;">
+    <button class="btn btn-primary" onclick="saveFormationLinks()">💾 Tout enregistrer</button>
+  </div>`;
+  document.getElementById('formations-table-wrap').innerHTML = html;
+}
+
+function saveSingleLink(id) {
+  const el = document.getElementById('fl-' + id);
+  if (!el) return;
+  const stored = JSON.parse(localStorage.getItem(KEYS.formations) || '{}');
+  stored[id] = { ...(stored[id]||{}), chariow: el.value.trim() };
+  localStorage.setItem(KEYS.formations, JSON.stringify(stored));
+  loadFormationsTable();
+  toast('Lien enregistré');
+}
+
+// ── TÉMOIGNAGES ──
+function getTemoignages() {
+  const stored = localStorage.getItem(KEYS.temoignages);
+  if (stored) return JSON.parse(stored);
+  return [
+    {id:'t1',nom:'Konan Didier',role:'Directeur — Groupe KD Distribution',texte:'ACDEES a transformé notre entreprise de fond en comble. En 4 mois, nous avions un CRM, une équipe formée et un chiffre d\'affaires en hausse de 40%.',note:'★★★★★',visible:true},
+    {id:'t2',nom:'Aminata N\'Goran',role:'Fondatrice — Centre Avenir Pro',texte:'Grâce à ACDEES, notre centre de formation est passé de 30 à plus de 300 inscrits en un seul trimestre.',note:'★★★★★',visible:true},
+    {id:'t3',nom:'Yao Thierry',role:'CEO — Thierry Solutions',texte:'Le diagnostic gratuit m\'a ouvert les yeux. Aujourd\'hui mes processus sont structurés et automatisés.',note:'★★★★★',visible:true}
+  ];
+}
+
+function loadTemoignages() {
+  const list = getTemoignages();
+  if (!list.length) { document.getElementById('testi-list').innerHTML = '<p style="color:var(--muted);font-size:.83rem;">Aucun témoignage.</p>'; return; }
+  document.getElementById('testi-list').innerHTML = `
+    <table class="admin-table">
+      <thead><tr><th>Client</th><th>Témoignage</th><th>Note</th><th>Visible</th><th></th></tr></thead>
+      <tbody>${list.map(t => `
+        <tr>
+          <td><div style="color:var(--white);">${t.nom}</div><div style="font-size:.72rem;color:var(--muted);">${t.role}</div></td>
+          <td style="max-width:300px;font-size:.8rem;color:var(--muted);">${t.texte.substring(0,100)}...</td>
+          <td><span style="color:var(--gold);">${t.note}</span></td>
+          <td><span class="pill ${t.visible?'pill-green':'pill-gray'}">${t.visible?'Visible':'Masqué'}</span></td>
+          <td style="display:flex;gap:6px;">
+            <button class="btn btn-sm btn-ghost" onclick="toggleTesti('${t.id}')">${t.visible?'Masquer':'Afficher'}</button>
+            <button class="btn btn-sm btn-danger" onclick="deleteTesti('${t.id}')">✕</button>
+          </td>
+        </tr>`).join('')}
+      </tbody>
+    </table>`;
+}
+
+function addTemoignage() {
+  const nom = document.getElementById('t-nom').value.trim();
+  const texte = document.getElementById('t-texte').value.trim();
+  if (!nom || !texte) return showAlert('alert-testi', 'Nom et témoignage sont requis.', false);
+  const list = getTemoignages();
+  list.push({ id:'t'+Date.now(), nom, role:document.getElementById('t-role').value, texte, note:document.getElementById('t-note').value, visible:document.getElementById('t-visible').checked });
+  localStorage.setItem(KEYS.temoignages, JSON.stringify(list));
+  document.getElementById('t-nom').value = '';
+  document.getElementById('t-role').value = '';
+  document.getElementById('t-texte').value = '';
+  loadTemoignages();
+  toast('Témoignage ajouté');
+}
+function toggleTesti(id) {
+  const list = getTemoignages();
+  const t = list.find(x => x.id === id);
+  if (t) t.visible = !t.visible;
+  localStorage.setItem(KEYS.temoignages, JSON.stringify(list));
+  loadTemoignages();
+}
+function deleteTesti(id) {
+  if (!confirm('Supprimer ce témoignage ?')) return;
+  const list = getTemoignages().filter(t => t.id !== id);
+  localStorage.setItem(KEYS.temoignages, JSON.stringify(list));
+  loadTemoignages();
+  toast('Témoignage supprimé');
+}
+
+// ── ARTICLES ──
+function getArticles() {
+  return JSON.parse(localStorage.getItem(KEYS.articles) || '[]');
+}
+function loadArticles() {
+  const arts = getArticles();
+  if (!arts.length) { document.getElementById('articles-list').innerHTML = '<p style="color:var(--muted);font-size:.83rem;">Aucun article publié.</p>'; return; }
+  document.getElementById('articles-list').innerHTML = `
+    <table class="admin-table">
+      <thead><tr><th>Titre</th><th>Catégorie</th><th>Date</th><th>Statut</th><th></th></tr></thead>
+      <tbody>${arts.map(a => `
+        <tr>
+          <td>${a.titre}</td>
+          <td><span class="pill pill-gray">${a.cat}</span></td>
+          <td style="font-size:.78rem;">${a.date}</td>
+          <td><span class="pill ${a.publie?'pill-green':'pill-gray'}">${a.publie?'Publié':'Brouillon'}</span></td>
+          <td style="display:flex;gap:6px;">
+            <button class="btn btn-sm btn-danger" onclick="deleteArticle('${a.id}')">✕ Suppr.</button>
+          </td>
+        </tr>`).join('')}
+      </tbody>
+    </table>`;
+}
+function addArticle() {
+  const titre = document.getElementById('b-titre').value.trim();
+  const desc = document.getElementById('b-desc').value.trim();
+  if (!titre || !desc) return showAlert('alert-blog', 'Titre et résumé sont requis.', false);
+  const arts = getArticles();
+  arts.unshift({ id:'a'+Date.now(), titre, desc, cat:document.getElementById('b-cat').value, contenu:document.getElementById('b-contenu').value, temps:document.getElementById('b-temps').value||'5 min', featured:document.getElementById('b-featured').checked, publie:document.getElementById('b-publie').checked, date: new Date().toLocaleDateString('fr-FR') });
+  localStorage.setItem(KEYS.articles, JSON.stringify(arts));
+  document.getElementById('b-titre').value = '';
+  document.getElementById('b-desc').value = '';
+  document.getElementById('b-contenu').value = '';
+  loadArticles();
+  toast('Article publié avec succès');
+}
+function deleteArticle(id) {
+  if (!confirm('Supprimer cet article ?')) return;
+  const arts = getArticles().filter(a => a.id !== id);
+  localStorage.setItem(KEYS.articles, JSON.stringify(arts));
+  loadArticles();
+  toast('Article supprimé');
+}
+
+// ── SERVICES ADMIN ──
+const SERVICES_DATA = [
+  {id:'s1',icon:'🏛️',name:'Conseil & Structuration',active:true},
+  {id:'s2',icon:'⚡',name:'Digitalisation & Automatisation',active:true},
+  {id:'s3',icon:'🤖',name:'Intelligence Artificielle',active:true},
+  {id:'s4',icon:'📈',name:'Développement Commercial',active:true},
+  {id:'s5',icon:'💻',name:'Création Digitale',active:true},
+  {id:'s6',icon:'🔄',name:'Externalisation de Services',active:true},
+  {id:'s7',icon:'🎨',name:'Marketing Digital',active:true},
+  {id:'s8',icon:'🖥️',name:'Maintenance Informatique',active:true}
+];
+
+function loadServicesAdmin() {
+  const stored = JSON.parse(localStorage.getItem(KEYS.services) || '{}');
+  document.getElementById('services-list').innerHTML = SERVICES_DATA.map(s => {
+    const d = stored[s.id] || {};
+    return `<div class="card" style="margin-bottom:14px;">
+      <div class="card-body" style="display:grid;grid-template-columns:auto 1fr auto;gap:16px;align-items:center;">
+        <div style="font-size:1.6rem;">${s.icon}</div>
+        <div>
+          <input class="f-input" id="sn-${s.id}" value="${d.name||s.name}" style="margin-bottom:8px;"/>
+          <textarea class="f-textarea" id="sd-${s.id}" rows="2" placeholder="Description courte du service...">${d.desc||''}</textarea>
+        </div>
+        <div class="toggle-wrap" style="flex-direction:column;gap:6px;">
+          <label class="toggle"><input type="checkbox" id="sa-${s.id}" ${(d.active!==false)?'checked':''}/><span class="toggle-slider"></span></label>
+          <span style="font-size:.65rem;color:var(--muted);">Actif</span>
+        </div>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+function saveServices() {
+  const data = {};
+  SERVICES_DATA.forEach(s => {
+    data[s.id] = {
+      name: document.getElementById('sn-'+s.id)?.value || s.name,
+      desc: document.getElementById('sd-'+s.id)?.value || '',
+      active: document.getElementById('sa-'+s.id)?.checked !== false
+    };
+  });
+  localStorage.setItem(KEYS.services, JSON.stringify(data));
+  toast('Services enregistrés');
+}
+
+// ── SUBMISSIONS ──
+function loadSubmissions() {
+  // RDV
+  const rdvKeys = Object.keys(localStorage).filter(k => k.startsWith('rdv_'));
+  const rdvList = rdvKeys.map(k => JSON.parse(localStorage.getItem(k))).filter(Boolean).sort((a,b)=>b.date?.localeCompare(a.date)||0);
+  document.getElementById('d-rdv').textContent = rdvList.length;
+  document.getElementById('rdv-badge').textContent = rdvList.length;
+
+  // Devis
+  const devisKeys = Object.keys(localStorage).filter(k => k.startsWith('devis_'));
+  const dList = devisKeys.map(k => JSON.parse(localStorage.getItem(k))).filter(Boolean);
+  document.getElementById('d-devis').textContent = dList.length;
+  document.getElementById('devis-badge').textContent = dList.length;
+
+  // Messages
+  const msgKeys = Object.keys(localStorage).filter(k => k.startsWith('contact_'));
+  const mList = msgKeys.map(k => JSON.parse(localStorage.getItem(k))).filter(Boolean);
+  document.getElementById('d-msgs').textContent = mList.length;
+  document.getElementById('msg-badge').textContent = mList.length;
+
+  // Render RDV table
+  if (rdvList.length) {
+    document.getElementById('rdv-table-wrap').innerHTML = `
+      <table class="admin-table">
+        <thead><tr><th>Nom</th><th>Type</th><th>Entreprise</th><th>Téléphone</th><th>Email</th><th>Service</th><th>Budget</th><th>Frein</th><th>Date</th><th></th></tr></thead>
+        <tbody>${rdvList.map(r=>`
+          <tr>
+            <td>${r.nom||'—'}</td>
+            <td><span class="pill pill-gold">${r.type||'—'}</span></td>
+            <td>${r.entreprise||'—'}</td>
+            <td><a href="tel:${r.telephone}" style="color:var(--gold);text-decoration:none;">${r.telephone||'—'}</a></td>
+            <td><a href="mailto:${r.email}" style="color:var(--gold);text-decoration:none;font-size:.8rem;">${r.email||'—'}</a></td>
+            <td style="font-size:.75rem;max-width:160px;">${r.services||'—'}</td>
+            <td style="font-size:.75rem;">${r.budget||'—'}</td>
+            <td style="font-size:.75rem;max-width:140px;">${r.frein||'—'}</td>
+            <td style="font-size:.75rem;">${r.date||'—'}</td>
+            <td><a href="https://wa.me/${(r.telephone||'').replace(/\D/g,'')}" target="_blank" class="btn btn-sm btn-primary">💬 WA</a></td>
+          </tr>`).join('')}
+        </tbody>
+      </table>`;
+    // Dashboard preview
+    document.getElementById('dash-rdv-list').innerHTML = rdvList.slice(0,3).map(r=>`
+      <div style="padding:10px 0;border-bottom:1px solid var(--border);display:flex;justify-content:space-between;align-items:center;">
+        <div><div style="font-size:.85rem;">${r.nom||'—'}</div><div style="font-size:.72rem;color:var(--muted);">${r.type||''} · ${r.date||''}</div></div>
+        <a href="https://wa.me/${(r.telephone||'').replace(/\D/g,'')}" target="_blank" class="btn btn-sm btn-primary">WA</a>
+      </div>`).join('');
+  }
+
+  // Render Devis table
+  if (dList.length) {
+    document.getElementById('devis-table-wrap').innerHTML = `
+      <table class="admin-table">
+        <thead><tr><th>Réf.</th><th>Client</th><th>Téléphone</th><th>Email</th><th>Services</th><th>Budget</th><th>Date</th><th></th></tr></thead>
+        <tbody>${dList.map(d=>`
+          <tr>
+            <td style="color:var(--gold);font-size:.8rem;">${d.ref||'—'}</td>
+            <td>${d.nom||'—'}<br/><span style="font-size:.72rem;color:var(--muted);">${d.entreprise||''}</span></td>
+            <td><a href="tel:${d.tel}" style="color:var(--gold);text-decoration:none;">${d.tel||'—'}</a></td>
+            <td style="font-size:.8rem;"><a href="mailto:${d.email}" style="color:var(--gold);text-decoration:none;">${d.email||'—'}</a></td>
+            <td style="font-size:.75rem;max-width:160px;">${d.services||'—'}</td>
+            <td style="font-size:.75rem;">${d.budget||'—'}</td>
+            <td style="font-size:.75rem;">${d.date||'—'}</td>
+            <td><a href="https://wa.me/${(d.tel||'').replace(/\D/g,'')}" target="_blank" class="btn btn-sm btn-primary">💬</a></td>
+          </tr>`).join('')}
+        </tbody>
+      </table>`;
+    document.getElementById('dash-devis-list').innerHTML = dList.slice(0,3).map(d=>`
+      <div style="padding:10px 0;border-bottom:1px solid var(--border);display:flex;justify-content:space-between;align-items:center;">
+        <div><div style="font-size:.85rem;">${d.nom||'—'} · <span style="color:var(--gold);">${d.ref||''}</span></div><div style="font-size:.72rem;color:var(--muted);">${d.budget||''} · ${d.date||''}</div></div>
+        <a href="mailto:${d.email}" class="btn btn-sm btn-ghost">Email</a>
+      </div>`).join('');
+  }
+
+  // Messages
+  if (mList.length) {
+    document.getElementById('msgs-table-wrap').innerHTML = `
+      <table class="admin-table">
+        <thead><tr><th>Nom</th><th>Téléphone</th><th>Email</th><th>Objet</th><th>Message</th><th>Date</th><th></th></tr></thead>
+        <tbody>${mList.map(m=>`
+          <tr>
+            <td>${m.nom||'—'}</td>
+            <td><a href="tel:${m.tel}" style="color:var(--gold);text-decoration:none;">${m.tel||'—'}</a></td>
+            <td><a href="mailto:${m.email}" style="color:var(--gold);text-decoration:none;font-size:.8rem;">${m.email||'—'}</a></td>
+            <td style="font-size:.78rem;">${m.objet||'—'}</td>
+            <td style="font-size:.78rem;max-width:200px;color:var(--muted);">${(m.message||'').substring(0,80)}...</td>
+            <td style="font-size:.75rem;">${m.date||'—'}</td>
+            <td><a href="mailto:${m.email}" class="btn btn-sm btn-ghost">Répondre</a></td>
+          </tr>`).join('')}
+        </tbody>
+      </table>`;
+  }
+}
+
+function updateDashboardCounts() {
+  loadSubmissions();
+}
+
+// ── SÉCURITÉ ──
+function changeCredentials() {
+  const oldPass = document.getElementById('old-pass').value;
+  const newUser = document.getElementById('new-user').value.trim();
+  const newPass = document.getElementById('new-pass').value;
+  const confirm = document.getElementById('confirm-pass').value;
+  const creds = getCreds();
+
+  if (oldPass !== creds.pass) return showAlert('alert-secu', '❌ Mot de passe actuel incorrect.', false);
+  if (newPass && newPass.length < 8) return showAlert('alert-secu', '❌ Le nouveau mot de passe doit faire au moins 8 caractères.', false);
+  if (newPass && newPass !== confirm) return showAlert('alert-secu', '❌ Les mots de passe ne correspondent pas.', false);
+
+  const updated = { user: newUser || creds.user, pass: newPass || creds.pass };
+  localStorage.setItem(KEYS.creds, JSON.stringify(updated));
+  document.getElementById('old-pass').value = '';
+  document.getElementById('new-pass').value = '';
+  document.getElementById('confirm-pass').value = '';
+  showAlert('alert-secu', '✅ Identifiants mis à jour avec succès.', true);
+  toast('Identifiants de connexion modifiés 🔐');
+}
+
+function loadLoginHistory() {
+  const log = JSON.parse(localStorage.getItem(KEYS.loginLog) || '[]');
+  if (!log.length) { document.getElementById('login-history').innerHTML = '<p style="color:var(--muted);font-size:.83rem;">Aucune connexion enregistrée.</p>'; return; }
+  document.getElementById('login-history').innerHTML = `
+    <table class="admin-table">
+      <thead><tr><th>Date & Heure</th><th>Utilisateur</th><th>Statut</th></tr></thead>
+      <tbody>${log.slice(0,15).map(l=>`
+        <tr>
+          <td style="font-size:.8rem;">${l.time}</td>
+          <td>${l.user}</td>
+          <td><span class="pill ${l.status==='Succès'?'pill-green':'pill-red'}">${l.status}</span></td>
+        </tr>`).join('')}
+      </tbody>
+    </table>`;
+}
+
+// ── APPARENCE ──
+function syncColor(colorId, hexId) {
+  const hex = document.getElementById(hexId).value;
+  if (/^#[0-9A-Fa-f]{6}$/.test(hex)) document.getElementById(colorId).value = hex;
+}
+function saveAppearance() {
+  const data = {
+    green: document.getElementById('c-green-hex').value,
+    gold: document.getElementById('c-gold-hex').value,
+    navy: document.getElementById('c-navy-hex').value,
+    surface: document.getElementById('c-surface-hex').value
+  };
+  localStorage.setItem('acdees_colors', JSON.stringify(data));
+  showAlert('alert-app', '✅ Couleurs enregistrées. Rechargez le site pour voir les changements.', true);
+  toast('Couleurs sauvegardées');
+}
+
+// ── LOAD DASHBOARD ──
+function loadDashboard() { loadSubmissions(); }
+
+function previewPage(page) { window.open(page, '_blank'); }
+</script>
+</body>
+</html>

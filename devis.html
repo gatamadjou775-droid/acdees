@@ -1,0 +1,463 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Demander un Devis — ACDEES</title>
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,600;0,700;1,400&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet"/>
+  <link rel="stylesheet" href="shared.css"/>
+  <style>
+    .devis-layout { display: grid; grid-template-columns: 1fr 380px; gap: 56px; padding: 72px 64px; max-width: 1280px; margin: 0 auto; }
+    .devis-form-card { background: var(--surface); border: 1px solid var(--border); border-radius: 16px; padding: 44px; }
+    .devis-form-card h2 { font-family: 'Playfair Display', serif; font-size: 1.5rem; margin-bottom: 6px; }
+    .devis-form-card > p { font-size: .85rem; color: rgba(255,255,255,.45); margin-bottom: 36px; }
+
+    .service-checkboxes { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+    .service-checkbox {
+      display: flex; align-items: center; gap: 10px;
+      background: rgba(255,255,255,.03); border: 1px solid var(--border);
+      border-radius: 8px; padding: 12px 14px; cursor: pointer;
+      transition: all .3s;
+    }
+    .service-checkbox:hover, .service-checkbox:has(input:checked) {
+      border-color: var(--green); background: rgba(31,122,61,.08);
+    }
+    .service-checkbox input { accent-color: var(--green); width: 15px; height: 15px; cursor: pointer; flex-shrink: 0; }
+    .service-checkbox span { font-size: .82rem; color: rgba(255,255,255,.7); line-height: 1.3; }
+
+    .budget-options { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+    .budget-opt {
+      background: rgba(255,255,255,.03); border: 1px solid var(--border);
+      border-radius: 8px; padding: 12px 16px; cursor: pointer;
+      transition: all .3s; text-align: center;
+    }
+    .budget-opt:hover, .budget-opt.selected { border-color: var(--gold); background: rgba(212,175,55,.07); }
+    .budget-opt span { font-size: .82rem; color: rgba(255,255,255,.65); }
+
+    .section-sep { border: none; border-top: 1px solid var(--border); margin: 32px 0; }
+
+    /* Devis preview */
+    .devis-preview {
+      background: var(--surface); border: 1px solid var(--border-gold);
+      border-radius: 16px; padding: 32px; position: sticky; top: 100px;
+      max-height: calc(100vh - 140px); overflow-y: auto;
+    }
+    .devis-preview h3 { font-family: 'Playfair Display', serif; font-size: 1.1rem; margin-bottom: 4px; color: var(--gold); }
+    .devis-preview p { font-size: .78rem; color: rgba(255,255,255,.35); margin-bottom: 24px; }
+
+    .preview-block { margin-bottom: 20px; }
+    .preview-label { font-size: .65rem; letter-spacing: .14em; text-transform: uppercase; color: rgba(255,255,255,.35); margin-bottom: 6px; }
+    .preview-value { font-size: .88rem; color: rgba(255,255,255,.8); line-height: 1.5; }
+    .preview-value.empty { color: rgba(255,255,255,.2); font-style: italic; }
+
+    .preview-services { display: flex; flex-direction: column; gap: 6px; }
+    .preview-service-tag {
+      font-size: .72rem; color: var(--green); background: var(--green-glow);
+      border: 1px solid var(--border-green); padding: 4px 10px; border-radius: 100px;
+      display: inline-block;
+    }
+
+    .preview-sep { border: none; border-top: 1px solid var(--border); margin: 20px 0; }
+
+    .btn-generate {
+      width: 100%; background: var(--gold); color: var(--navy);
+      font-size: .82rem; font-weight: 600; letter-spacing: .1em; text-transform: uppercase;
+      padding: 15px; border-radius: 8px; border: none; cursor: pointer;
+      transition: opacity .3s; margin-top: 8px; font-family: 'Inter', sans-serif;
+    }
+    .btn-generate:hover { opacity: .88; }
+    .btn-generate:disabled { opacity: .4; cursor: not-allowed; }
+
+    .devis-ref { font-size: .7rem; color: rgba(255,255,255,.2); text-align: center; margin-top: 10px; }
+
+    .success-state { text-align: center; padding: 40px 20px; }
+    .success-state .big-check { font-size: 3.5rem; margin-bottom: 16px; }
+
+    @media(max-width:1100px) { .devis-layout { grid-template-columns: 1fr; } .devis-preview { position: static; } }
+    @media(max-width:600px) {
+      .devis-layout { padding: 40px 16px; }
+      .devis-form-card { padding: 24px 16px; }
+      .service-checkboxes { grid-template-columns: 1fr; }
+      .budget-options { grid-template-columns: 1fr; }
+    }
+  </style>
+</head>
+<body>
+<div id="nav-placeholder"></div>
+
+<div class="page-hero">
+  <div class="page-hero-grid"></div>
+  <div class="page-hero-inner">
+    <div class="breadcrumb"><a href="index.html">Accueil</a> › <span>Demander un devis</span></div>
+    <div class="page-eyebrow">Devis gratuit & sans engagement</div>
+    <h1 class="page-title">Demandez votre <span>Devis</span></h1>
+    <p class="page-subtitle">Remplissez ce formulaire et recevez une proposition détaillée sous 48h. Un devis PDF vous sera transmis par email.</p>
+  </div>
+</div>
+
+<div class="devis-layout">
+
+  <!-- FORM -->
+  <div>
+    <div class="devis-form-card" id="devis-form">
+      <h2>Votre demande de devis</h2>
+      <p>Tous les champs marqués * sont obligatoires. Plus vous êtes précis, plus notre devis sera adapté.</p>
+      <div id="alert-devis" class="alert"></div>
+
+      <!-- Identité -->
+      <div class="form-step-title">1. Vos coordonnées</div>
+      <div class="green-divider"></div>
+      <div class="form-grid">
+        <div class="form-group">
+          <label class="form-label">Nom complet <span class="req">*</span></label>
+          <input class="form-input" type="text" id="d_nom" placeholder="Prénom Nom" oninput="updatePreview()"/>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Entreprise / Organisation</label>
+          <input class="form-input" type="text" id="d_entreprise" placeholder="Ma Société" oninput="updatePreview()"/>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Téléphone / WhatsApp <span class="req">*</span></label>
+          <input class="form-input" type="tel" id="d_tel" placeholder="+225 07 00 00 00 00" oninput="updatePreview()"/>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Email <span class="req">*</span></label>
+          <input class="form-input" type="email" id="d_email" placeholder="vous@exemple.com" oninput="updatePreview()"/>
+        </div>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Ville / Pays <span class="req">*</span></label>
+        <input class="form-input" type="text" id="d_ville" placeholder="Abidjan, Côte d'Ivoire" oninput="updatePreview()"/>
+      </div>
+
+      <hr class="section-sep"/>
+
+      <!-- Services -->
+      <div class="form-step-title">2. Service(s) demandé(s)</div>
+      <div class="green-divider"></div>
+      <div class="form-group">
+        <label class="form-label">Sélectionnez un ou plusieurs services <span class="req">*</span></label>
+        <div class="service-checkboxes" id="d_services">
+          <label class="service-checkbox"><input type="checkbox" value="Conseil & Structuration" onchange="updatePreview()"/><span>🏛️ Conseil & Structuration</span></label>
+          <label class="service-checkbox"><input type="checkbox" value="Digitalisation & Automatisation" onchange="updatePreview()"/><span>⚡ Digitalisation & Automatisation</span></label>
+          <label class="service-checkbox"><input type="checkbox" value="Intelligence Artificielle" onchange="updatePreview()"/><span>🤖 Intelligence Artificielle</span></label>
+          <label class="service-checkbox"><input type="checkbox" value="Développement Commercial" onchange="updatePreview()"/><span>📈 Développement Commercial</span></label>
+          <label class="service-checkbox"><input type="checkbox" value="Création de site web" onchange="updatePreview()"/><span>💻 Création de site web</span></label>
+          <label class="service-checkbox"><input type="checkbox" value="E-commerce / Boutique en ligne" onchange="updatePreview()"/><span>🛒 E-commerce / Boutique</span></label>
+          <label class="service-checkbox"><input type="checkbox" value="Application web / SaaS" onchange="updatePreview()"/><span>📱 Application web / SaaS</span></label>
+          <label class="service-checkbox"><input type="checkbox" value="Externalisation" onchange="updatePreview()"/><span>🔄 Externalisation</span></label>
+          <label class="service-checkbox"><input type="checkbox" value="Marketing Digital & Contenu" onchange="updatePreview()"/><span>🎨 Marketing Digital</span></label>
+          <label class="service-checkbox"><input type="checkbox" value="Maintenance Informatique" onchange="updatePreview()"/><span>🖥️ Maintenance Informatique</span></label>
+        </div>
+      </div>
+
+      <hr class="section-sep"/>
+
+      <!-- Projet -->
+      <div class="form-step-title">3. Votre projet</div>
+      <div class="green-divider"></div>
+      <div class="form-group">
+        <label class="form-label">Décrivez votre besoin en détail <span class="req">*</span></label>
+        <textarea class="form-textarea" id="d_besoin" rows="5" placeholder="Décrivez votre projet, vos objectifs, ce que vous attendez du prestataire, les contraintes éventuelles..." oninput="updatePreview()"></textarea>
+      </div>
+      <div class="form-grid">
+        <div class="form-group">
+          <label class="form-label">Secteur d'activité</label>
+          <select class="form-select" id="d_secteur" onchange="updatePreview()">
+            <option value="">Sélectionner</option>
+            <option>Commerce / Distribution</option>
+            <option>Services B2B</option>
+            <option>Services B2C</option>
+            <option>BTP / Construction</option>
+            <option>Agroalimentaire</option>
+            <option>Santé / Pharmacie</option>
+            <option>Éducation / Formation</option>
+            <option>Technologie</option>
+            <option>Finance / Assurance</option>
+            <option>Transport / Logistique</option>
+            <option>Hôtellerie / Restauration</option>
+            <option>ONG / Association</option>
+            <option>Autre</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Délai souhaité</label>
+          <select class="form-select" id="d_delai" onchange="updatePreview()">
+            <option value="">Sélectionner</option>
+            <option>Urgent (moins de 2 semaines)</option>
+            <option>1 mois</option>
+            <option>2–3 mois</option>
+            <option>3–6 mois</option>
+            <option>Flexible</option>
+          </select>
+        </div>
+      </div>
+
+      <hr class="section-sep"/>
+
+      <!-- Budget -->
+      <div class="form-step-title">4. Budget envisagé</div>
+      <div class="green-divider"></div>
+      <div class="form-group">
+        <div class="budget-options" id="d_budget_opts">
+          <div class="budget-opt" onclick="selectBudget(this,'Moins de 100 000 FCFA')"><span>Moins de 100 000 FCFA</span></div>
+          <div class="budget-opt" onclick="selectBudget(this,'100 000 – 500 000 FCFA')"><span>100 000 – 500 000 FCFA</span></div>
+          <div class="budget-opt" onclick="selectBudget(this,'500 000 – 2 000 000 FCFA')"><span>500 000 – 2 000 000 FCFA</span></div>
+          <div class="budget-opt" onclick="selectBudget(this,'2 000 000 – 5 000 000 FCFA')"><span>2 000 000 – 5 000 000 FCFA</span></div>
+          <div class="budget-opt" onclick="selectBudget(this,'Plus de 5 000 000 FCFA')"><span>Plus de 5 000 000 FCFA</span></div>
+          <div class="budget-opt" onclick="selectBudget(this,'À définir ensemble')"><span>À définir ensemble</span></div>
+        </div>
+        <input type="hidden" id="d_budget" value=""/>
+      </div>
+
+      <div class="form-group" style="margin-top:8px;">
+        <label class="form-label">Informations complémentaires</label>
+        <textarea class="form-textarea" id="d_infos" rows="3" placeholder="Référence de projets similaires, contraintes techniques, exigences spécifiques..."></textarea>
+      </div>
+
+      <div class="form-group">
+        <div class="form-check">
+          <input type="checkbox" id="d_consent"/>
+          <span>J'accepte que mes données soient traitées par ACDEES pour ma demande de devis, conformément à la <a href="confidentialite.html">politique de confidentialité</a>.</span>
+        </div>
+      </div>
+
+      <button class="btn-green" onclick="submitDevis()" style="width:100%;padding:16px;font-size:.85rem;">
+        📧 Envoyer ma demande de devis
+      </button>
+    </div>
+
+    <!-- Success -->
+    <div class="devis-form-card success-state" id="devis-success" style="display:none;">
+      <div class="big-check">📋</div>
+      <h3 style="font-family:'Playfair Display',serif;font-size:1.6rem;margin-bottom:14px;">Demande reçue !</h3>
+      <p style="color:rgba(255,255,255,.6);line-height:1.8;max-width:440px;margin:0 auto 28px;">Merci pour votre demande. Notre équipe l'analyse et vous envoie un devis détaillé par email sous <strong>48 heures ouvrables</strong>.</p>
+      <div id="devis-ref-display" style="font-family:'Playfair Display',serif;font-size:1.1rem;color:var(--gold);margin-bottom:28px;"></div>
+      <div style="display:flex;gap:12px;justify-content:center;flex-wrap:wrap;">
+        <a href="https://wa.me/2250711615439" class="btn-green" target="_blank">💬 WhatsApp</a>
+        <a href="index.html" class="btn-outline">Retour à l'accueil</a>
+      </div>
+    </div>
+  </div>
+
+  <!-- PREVIEW -->
+  <div class="devis-preview">
+    <h3>Aperçu de votre devis</h3>
+    <p>Se met à jour automatiquement</p>
+
+    <div class="preview-block">
+      <div class="preview-label">Référence</div>
+      <div class="preview-value" id="prev_ref" style="color:var(--gold);font-family:'Playfair Display',serif;"></div>
+    </div>
+
+    <div class="preview-block">
+      <div class="preview-label">Client</div>
+      <div class="preview-value" id="prev_client"><span class="empty">— à remplir —</span></div>
+    </div>
+
+    <div class="preview-block">
+      <div class="preview-label">Entreprise</div>
+      <div class="preview-value" id="prev_entreprise"><span class="empty">— à remplir —</span></div>
+    </div>
+
+    <div class="preview-block">
+      <div class="preview-label">Ville</div>
+      <div class="preview-value" id="prev_ville"><span class="empty">— à remplir —</span></div>
+    </div>
+
+    <div class="preview-sep"></div>
+
+    <div class="preview-block">
+      <div class="preview-label">Services demandés</div>
+      <div class="preview-services" id="prev_services">
+        <span style="font-size:.82rem;color:rgba(255,255,255,.2);font-style:italic;">— sélectionner des services —</span>
+      </div>
+    </div>
+
+    <div class="preview-sep"></div>
+
+    <div class="preview-block">
+      <div class="preview-label">Budget</div>
+      <div class="preview-value" id="prev_budget"><span class="empty">— à définir —</span></div>
+    </div>
+
+    <div class="preview-block">
+      <div class="preview-label">Délai souhaité</div>
+      <div class="preview-value" id="prev_delai"><span class="empty">— à définir —</span></div>
+    </div>
+
+    <div class="preview-block">
+      <div class="preview-label">Secteur</div>
+      <div class="preview-value" id="prev_secteur"><span class="empty">— à définir —</span></div>
+    </div>
+
+    <div class="preview-sep"></div>
+
+    <div style="font-size:.72rem;color:rgba(255,255,255,.3);margin-bottom:16px;">
+      Émis par ACDEES · <span id="prev_date"></span>
+    </div>
+
+    <button class="btn-generate" id="gen-btn" disabled onclick="generateDevisPDF()">
+      📄 Générer le devis PDF
+    </button>
+    <div class="devis-ref" id="devis-ref-hint">Complétez le formulaire pour activer</div>
+  </div>
+</div>
+
+<div id="footer-placeholder"></div>
+<script src="shared.js"></script>
+<script>
+  document.getElementById('nav-placeholder').innerHTML = ACDEES.nav();
+  document.getElementById('footer-placeholder').innerHTML = ACDEES.footer();
+
+  let selectedBudget = '';
+  const ref = 'DEV-ACDEES-' + Date.now().toString(36).toUpperCase().slice(-6);
+  document.getElementById('prev_ref').textContent = ref;
+  document.getElementById('prev_date').textContent = new Date().toLocaleDateString('fr-FR');
+
+  function selectBudget(el, val) {
+    document.querySelectorAll('.budget-opt').forEach(b => b.classList.remove('selected'));
+    el.classList.add('selected');
+    selectedBudget = val;
+    document.getElementById('d_budget').value = val;
+    updatePreview();
+  }
+
+  function updatePreview() {
+    const nom = document.getElementById('d_nom').value.trim();
+    const entreprise = document.getElementById('d_entreprise').value.trim();
+    const ville = document.getElementById('d_ville').value.trim();
+    const delai = document.getElementById('d_delai').value;
+    const secteur = document.getElementById('d_secteur').value;
+    const services = [...document.querySelectorAll('#d_services input:checked')].map(i => i.value);
+
+    document.getElementById('prev_client').innerHTML = nom || '<span class="empty">— à remplir —</span>';
+    document.getElementById('prev_entreprise').innerHTML = entreprise || '<span class="empty">— à remplir —</span>';
+    document.getElementById('prev_ville').innerHTML = ville || '<span class="empty">— à remplir —</span>';
+    document.getElementById('prev_budget').innerHTML = selectedBudget || '<span class="empty">— à définir —</span>';
+    document.getElementById('prev_delai').innerHTML = delai || '<span class="empty">— à définir —</span>';
+    document.getElementById('prev_secteur').innerHTML = secteur || '<span class="empty">— à définir —</span>';
+
+    if (services.length > 0) {
+      document.getElementById('prev_services').innerHTML = services.map(s => `<span class="preview-service-tag">${s}</span>`).join('');
+    } else {
+      document.getElementById('prev_services').innerHTML = '<span style="font-size:.82rem;color:rgba(255,255,255,.2);font-style:italic;">— sélectionner des services —</span>';
+    }
+
+    const canGenerate = nom && services.length > 0;
+    document.getElementById('gen-btn').disabled = !canGenerate;
+    document.getElementById('devis-ref-hint').textContent = canGenerate ? 'Prêt à générer' : 'Complétez le formulaire pour activer';
+  }
+
+  function generateDevisPDF() {
+    const nom = document.getElementById('d_nom').value.trim();
+    const entreprise = document.getElementById('d_entreprise').value.trim();
+    const ville = document.getElementById('d_ville').value.trim();
+    const tel = document.getElementById('d_tel').value.trim();
+    const email = document.getElementById('d_email').value.trim();
+    const besoin = document.getElementById('d_besoin').value.trim();
+    const secteur = document.getElementById('d_secteur').value;
+    const delai = document.getElementById('d_delai').value;
+    const services = [...document.querySelectorAll('#d_services input:checked')].map(i => i.value);
+    const date = new Date().toLocaleDateString('fr-FR');
+
+    const content = `
+DEVIS — ACDEES
+Agence de Conseil, Digitalisation et Externalisation de Services
+Abidjan, Côte d'Ivoire | +225 07 11 61 54 39 | contact@acdees.ci
+"Transformons votre vision en une entreprise structurée, performante et rentable."
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+RÉFÉRENCE : ${ref}
+DATE       : ${date}
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+INFORMATIONS CLIENT
+Client     : ${nom}
+Entreprise : ${entreprise || 'Non renseigné'}
+Téléphone  : ${tel || 'Non renseigné'}
+Email      : ${email || 'Non renseigné'}
+Ville      : ${ville || 'Non renseigné'}
+Secteur    : ${secteur || 'Non renseigné'}
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+SERVICES DEMANDÉS
+${services.map((s, i) => `  ${i + 1}. ${s}`).join('\n')}
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+DESCRIPTION DU BESOIN
+${besoin || 'Non renseigné'}
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+BUDGET & DÉLAI
+Budget envisagé  : ${selectedBudget || 'À définir ensemble'}
+Délai souhaité   : ${delai || 'À définir'}
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+PROCHAINES ÉTAPES
+
+Suite à réception de ce formulaire, notre équipe ACDEES vous 
+contactera sous 48 heures ouvrables pour :
+  1. Analyser votre besoin en détail
+  2. Vous proposer une solution adaptée et chiffrée
+  3. Planifier un échange téléphonique ou WhatsApp
+
+Pour toute urgence : +225 07 11 61 54 39 / +225 01 71 01 61 41
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+© 2026 ACDEES — Tous droits réservés
+Ce document est une demande de devis et ne constitue pas un engagement contractuel.
+    `.trim();
+
+    const blob = new Blob([content], { type: 'text/plain;charset=utf-8' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `Devis_ACDEES_${ref}.txt`;
+    a.click();
+    URL.revokeObjectURL(url);
+  }
+
+  function submitDevis() {
+    const nom = document.getElementById('d_nom').value.trim();
+    const tel = document.getElementById('d_tel').value.trim();
+    const email = document.getElementById('d_email').value.trim();
+    const ville = document.getElementById('d_ville').value.trim();
+    const besoin = document.getElementById('d_besoin').value.trim();
+    const services = [...document.querySelectorAll('#d_services input:checked')];
+    const consent = document.getElementById('d_consent').checked;
+
+    const showErr = msg => {
+      const a = document.getElementById('alert-devis');
+      a.textContent = msg; a.className = 'alert alert-error'; a.style.display = 'block';
+      setTimeout(() => a.style.display = 'none', 5000);
+    };
+
+    if (!nom) return showErr('Veuillez entrer votre nom.');
+    if (!tel) return showErr('Veuillez entrer votre téléphone.');
+    if (!email || !email.includes('@')) return showErr('Email invalide.');
+    if (!ville) return showErr('Veuillez entrer votre ville.');
+    if (services.length === 0) return showErr('Sélectionnez au moins un service.');
+    if (!besoin) return showErr('Veuillez décrire votre besoin.');
+    if (!consent) return showErr('Veuillez accepter la politique de confidentialité.');
+
+    // Save
+    const data = {
+      ref, nom, tel, email, ville,
+      entreprise: document.getElementById('d_entreprise').value,
+      services: services.map(i => i.value).join(', '),
+      besoin, budget: selectedBudget,
+      secteur: document.getElementById('d_secteur').value,
+      delai: document.getElementById('d_delai').value,
+      date: new Date().toLocaleDateString('fr-FR')
+    };
+    localStorage.setItem('devis_' + ref, JSON.stringify(data));
+
+    document.getElementById('devis-form').style.display = 'none';
+    document.getElementById('devis-success').style.display = 'block';
+    document.getElementById('devis-ref-display').textContent = 'Réf. ' + ref;
+
+    // Auto-generate PDF
+    setTimeout(() => generateDevisPDF(), 600);
+  }
+</script>
+</body>
+</html>

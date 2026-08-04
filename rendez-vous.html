@@ -1,0 +1,614 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Prendre RDV — ACDEES</title>
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,600;0,700;1,400&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet"/>
+  <link rel="stylesheet" href="shared.css"/>
+  <style>
+    .rdv-layout {
+      display: grid; grid-template-columns: 1fr 420px; gap: 60px;
+      padding: 80px 64px; max-width: 1300px; margin: 0 auto;
+    }
+
+    /* Stepper */
+    .stepper { display: flex; gap: 0; margin-bottom: 48px; }
+    .step-item {
+      display: flex; align-items: center; flex: 1;
+    }
+    .step-item:last-child { flex: 0; }
+    .step-circle-wrap { display: flex; flex-direction: column; align-items: center; gap: 6px; }
+    .step-num {
+      width: 36px; height: 36px; border-radius: 50%;
+      border: 2px solid rgba(255,255,255,.15);
+      display: flex; align-items: center; justify-content: center;
+      font-size: .82rem; font-weight: 500; color: rgba(255,255,255,.4);
+      transition: all .4s; background: var(--navy2);
+    }
+    .step-num.active { border-color: var(--green); color: var(--white); background: var(--green); box-shadow: 0 0 16px var(--green-glow); }
+    .step-num.done { border-color: var(--gold); background: var(--gold); color: var(--navy); }
+    .step-label { font-size: .66rem; letter-spacing: .1em; text-transform: uppercase; color: rgba(255,255,255,.35); white-space: nowrap; }
+    .step-label.active { color: var(--gold); }
+    .step-line { flex: 1; height: 1px; background: rgba(255,255,255,.1); margin: 0 8px; margin-bottom: 20px; transition: background .4s; }
+    .step-line.done { background: var(--green); }
+
+    /* Form card */
+    .form-card {
+      background: var(--surface); border: 1px solid var(--border);
+      border-radius: 16px; padding: 44px;
+    }
+    .form-section { display: none; }
+    .form-section.active { display: block; }
+
+    .form-nav { display: flex; gap: 12px; margin-top: 36px; }
+
+    /* Sidebar */
+    .rdv-sidebar { display: flex; flex-direction: column; gap: 20px; }
+    .sidebar-card {
+      background: var(--surface); border: 1px solid var(--border);
+      border-radius: 14px; padding: 28px;
+    }
+    .sidebar-card h3 {
+      font-family: 'Playfair Display', serif; font-size: 1.05rem;
+      margin-bottom: 16px; color: var(--white);
+    }
+    .contact-item { display: flex; align-items: center; gap: 12px; margin-bottom: 14px; }
+    .contact-icon {
+      width: 36px; height: 36px; flex-shrink: 0;
+      background: var(--green-glow); border: 1px solid var(--border-green);
+      border-radius: 8px; display: flex; align-items: center; justify-content: center;
+      font-size: .95rem;
+    }
+    .contact-label { font-size: .7rem; letter-spacing: .1em; text-transform: uppercase; color: rgba(255,255,255,.35); }
+    .contact-value { font-size: .87rem; color: rgba(255,255,255,.8); margin-top: 1px; }
+    .contact-value a { color: rgba(255,255,255,.8); text-decoration: none; transition: color .3s; }
+    .contact-value a:hover { color: var(--gold); }
+
+    .why-rdv-list { list-style: none; display: flex; flex-direction: column; gap: 10px; }
+    .why-rdv-list li {
+      font-size: .85rem; color: rgba(255,255,255,.6);
+      display: flex; gap: 10px; align-items: flex-start;
+    }
+    .why-rdv-list li::before { content: '✓'; color: var(--green); flex-shrink: 0; }
+
+    .type-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 28px; }
+    .type-card {
+      background: rgba(255,255,255,.03); border: 2px solid var(--border);
+      border-radius: 10px; padding: 18px 16px;
+      cursor: pointer; transition: all .3s; text-align: center;
+    }
+    .type-card:hover, .type-card.selected {
+      border-color: var(--green); background: rgba(31,122,61,.08);
+    }
+    .type-card.selected { box-shadow: 0 0 0 1px var(--green); }
+    .type-icon { font-size: 1.6rem; margin-bottom: 8px; }
+    .type-name { font-size: .82rem; font-weight: 500; color: var(--white); }
+    .type-desc { font-size: .72rem; color: rgba(255,255,255,.4); margin-top: 4px; line-height: 1.4; }
+
+    .score-bar {
+      background: rgba(255,255,255,.06); border-radius: 100px;
+      height: 6px; margin-top: 8px; overflow: hidden;
+    }
+    .score-fill { height: 100%; background: linear-gradient(to right, var(--green), var(--gold)); border-radius: 100px; transition: width .5s; }
+
+    .success-box {
+      text-align: center; padding: 48px 32px;
+    }
+    .success-icon { font-size: 4rem; margin-bottom: 20px; }
+    .success-box h3 { font-family: 'Playfair Display', serif; font-size: 1.6rem; margin-bottom: 12px; }
+    .success-box p { font-size: .9rem; color: rgba(255,255,255,.6); line-height: 1.8; max-width: 400px; margin: 0 auto 28px; }
+
+    .range-wrap { display: flex; align-items: center; gap: 14px; }
+    .range-wrap input[type=range] {
+      flex: 1; accent-color: var(--green); height: 4px; cursor: pointer;
+    }
+    .range-val { min-width: 100px; font-size: .87rem; color: var(--gold); text-align: right; white-space: nowrap; }
+
+    @media(max-width:1024px) { .rdv-layout { grid-template-columns: 1fr; } }
+    @media(max-width:600px) {
+      .rdv-layout { padding: 40px 16px; }
+      .form-card { padding: 24px 18px; }
+      .type-grid { grid-template-columns: 1fr; }
+    }
+  </style>
+</head>
+<body>
+<div id="nav-placeholder"></div>
+
+<div class="page-hero">
+  <div class="page-hero-grid"></div>
+  <div class="page-hero-inner">
+    <div class="breadcrumb"><a href="index.html">Accueil</a> › <span>Rendez-vous</span></div>
+    <div class="page-eyebrow">Diagnostic gratuit · 30 minutes</div>
+    <h1 class="page-title">Réservez votre <span>RDV</span></h1>
+    <p class="page-subtitle">Répondez à quelques questions sur votre activité et vos besoins. Nous vous recontactons sous 24h pour fixer le créneau qui vous convient.</p>
+  </div>
+</div>
+
+<div class="rdv-layout">
+
+  <!-- FORM -->
+  <div>
+    <!-- Stepper -->
+    <div class="stepper" id="stepper">
+      <div class="step-item">
+        <div class="step-circle-wrap">
+          <div class="step-num active" id="sn1">1</div>
+          <div class="step-label active" id="sl1">Type de RDV</div>
+        </div>
+        <div class="step-line" id="sl-1"></div>
+      </div>
+      <div class="step-item">
+        <div class="step-circle-wrap">
+          <div class="step-num" id="sn2">2</div>
+          <div class="step-label" id="sl2">Votre activité</div>
+        </div>
+        <div class="step-line" id="sl-2"></div>
+      </div>
+      <div class="step-item">
+        <div class="step-circle-wrap">
+          <div class="step-num" id="sn3">3</div>
+          <div class="step-label" id="sl3">Vos besoins</div>
+        </div>
+        <div class="step-line" id="sl-3"></div>
+      </div>
+      <div class="step-item">
+        <div class="step-circle-wrap">
+          <div class="step-num" id="sn4">4</div>
+          <div class="step-label" id="sl4">Diagnostic</div>
+        </div>
+        <div class="step-line" id="sl-4"></div>
+      </div>
+      <div class="step-item">
+        <div class="step-circle-wrap">
+          <div class="step-num" id="sn5">5</div>
+          <div class="step-label" id="sl5">Contact</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="form-card">
+      <div id="alert" class="alert"></div>
+
+      <!-- ÉTAPE 1 : TYPE -->
+      <div class="form-section active" id="step1">
+        <div class="form-step-title">Quel type de rendez-vous souhaitez-vous ?</div>
+        <div class="form-step-desc">Choisissez le format le plus adapté à votre situation actuelle.</div>
+        <div class="type-grid">
+          <div class="type-card selected" onclick="selectType(this,'Diagnostic gratuit 30min')">
+            <div class="type-icon">🔍</div>
+            <div class="type-name">Diagnostic gratuit</div>
+            <div class="type-desc">30 min · Gratuit<br>Évaluation de votre situation</div>
+          </div>
+          <div class="type-card" onclick="selectType(this,'Consultation stratégique')">
+            <div class="type-icon">🎯</div>
+            <div class="type-name">Consultation stratégique</div>
+            <div class="type-desc">60 min · Payant<br>Accompagnement approfondi</div>
+          </div>
+          <div class="type-card" onclick="selectType(this,'Présentation de service')">
+            <div class="type-icon">📋</div>
+            <div class="type-name">Présentation service</div>
+            <div class="type-desc">45 min · Gratuit<br>Découvrir une offre ACDEES</div>
+          </div>
+          <div class="type-card" onclick="selectType(this,'Suivi de formation')">
+            <div class="type-icon">🎓</div>
+            <div class="type-name">Suivi de formation</div>
+            <div class="type-desc">30 min · Inclus<br>Pour les apprenants ACDEES</div>
+          </div>
+        </div>
+        <input type="hidden" id="rdv_type" value="Diagnostic gratuit 30min"/>
+        <div class="form-nav">
+          <button class="btn-green" onclick="nextStep(1)">Continuer →</button>
+        </div>
+      </div>
+
+      <!-- ÉTAPE 2 : ACTIVITÉ -->
+      <div class="form-section" id="step2">
+        <div class="form-step-title">Parlez-nous de votre activité</div>
+        <div class="form-step-desc">Ces informations nous permettent de préparer un échange vraiment utile pour vous.</div>
+        <div class="form-grid">
+          <div class="form-group">
+            <label class="form-label">Nom complet <span class="req">*</span></label>
+            <input class="form-input" type="text" id="nom" placeholder="Jean-Baptiste Kouamé"/>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Nom de l'entreprise</label>
+            <input class="form-input" type="text" id="entreprise" placeholder="Ma Société SARL"/>
+          </div>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Secteur d'activité <span class="req">*</span></label>
+          <select class="form-select" id="secteur">
+            <option value="">Sélectionnez votre secteur</option>
+            <option>Commerce / Distribution</option>
+            <option>Services aux entreprises (B2B)</option>
+            <option>Services aux particuliers (B2C)</option>
+            <option>BTP / Construction</option>
+            <option>Agroalimentaire / Agriculture</option>
+            <option>Santé / Pharmacie</option>
+            <option>Éducation / Formation</option>
+            <option>Technologie / Informatique</option>
+            <option>Finance / Assurance</option>
+            <option>Transport / Logistique</option>
+            <option>Hôtellerie / Restauration</option>
+            <option>ONG / Association</option>
+            <option>Autre</option>
+          </select>
+        </div>
+        <div class="form-grid">
+          <div class="form-group">
+            <label class="form-label">Taille de l'entreprise</label>
+            <select class="form-select" id="taille">
+              <option value="">Sélectionner</option>
+              <option>Solo / Freelance</option>
+              <option>2–5 employés</option>
+              <option>6–20 employés</option>
+              <option>21–50 employés</option>
+              <option>Plus de 50 employés</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Ancienneté</label>
+            <select class="form-select" id="anciennete">
+              <option value="">Sélectionner</option>
+              <option>Projet / Idée</option>
+              <option>Moins d'1 an</option>
+              <option>1 à 3 ans</option>
+              <option>3 à 7 ans</option>
+              <option>Plus de 7 ans</option>
+            </select>
+          </div>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Décrivez brièvement votre activité</label>
+          <textarea class="form-textarea" id="activite_desc" rows="3" placeholder="Que faites-vous ? Qui sont vos clients ? Sur quel marché opérez-vous ?"></textarea>
+        </div>
+        <div class="form-nav">
+          <button class="btn-outline" onclick="prevStep(2)">← Retour</button>
+          <button class="btn-green" onclick="nextStep(2)">Continuer →</button>
+        </div>
+      </div>
+
+      <!-- ÉTAPE 3 : BESOINS -->
+      <div class="form-section" id="step3">
+        <div class="form-step-title">Quels sont vos besoins prioritaires ?</div>
+        <div class="form-step-desc">Sélectionnez tout ce qui correspond à votre situation actuelle.</div>
+        <div class="form-group">
+          <label class="form-label">Service(s) recherché(s) <span class="req">*</span></label>
+          <div class="form-radio-group" id="services_check">
+            <label class="form-radio"><input type="checkbox" value="Conseil & Structuration"/><span>🏛️ Conseil & Structuration — Organiser et clarifier ma stratégie</span></label>
+            <label class="form-radio"><input type="checkbox" value="Digitalisation & Automatisation"/><span>⚡ Digitalisation — Automatiser mes processus et gagner en efficacité</span></label>
+            <label class="form-radio"><input type="checkbox" value="Intelligence Artificielle"/><span>🤖 Intelligence Artificielle — Intégrer l'IA dans mon entreprise</span></label>
+            <label class="form-radio"><input type="checkbox" value="Développement Commercial"/><span>📈 Développement Commercial — Générer plus de clients et de revenus</span></label>
+            <label class="form-radio"><input type="checkbox" value="Création Digitale"/><span>💻 Création Digitale — Site web, app ou boutique en ligne</span></label>
+            <label class="form-radio"><input type="checkbox" value="Externalisation"/><span>🔄 Externalisation — Déléguer des fonctions support</span></label>
+            <label class="form-radio"><input type="checkbox" value="Marketing Digital"/><span>🎨 Marketing Digital — Image de marque et contenu</span></label>
+            <label class="form-radio"><input type="checkbox" value="Maintenance Informatique"/><span>🖥️ Maintenance Informatique — Gérer mon parc IT</span></label>
+          </div>
+        </div>
+        <div class="form-group" style="margin-top:24px;">
+          <label class="form-label">Budget mensuel envisagé</label>
+          <div class="range-wrap">
+            <input type="range" id="budget_range" min="0" max="5" value="1" oninput="updateBudget(this.value)"/>
+            <div class="range-val" id="budget_display">50 000 – 150 000 FCFA</div>
+          </div>
+          <input type="hidden" id="budget" value="50 000 – 150 000 FCFA"/>
+          <div class="score-bar"><div class="score-fill" id="budget_fill" style="width:20%"></div></div>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Délai de mise en œuvre souhaité</label>
+          <select class="form-select" id="delai">
+            <option value="">Sélectionner</option>
+            <option>Le plus tôt possible (urgent)</option>
+            <option>Dans le mois</option>
+            <option>Dans les 3 prochains mois</option>
+            <option>Dans les 6 prochains mois</option>
+            <option>Pas de délai précis — exploration</option>
+          </select>
+        </div>
+        <div class="form-nav">
+          <button class="btn-outline" onclick="prevStep(3)">← Retour</button>
+          <button class="btn-green" onclick="nextStep(3)">Continuer →</button>
+        </div>
+      </div>
+
+      <!-- ÉTAPE 4 : DIAGNOSTIC -->
+      <div class="form-section" id="step4">
+        <div class="form-step-title">Questions de diagnostic</div>
+        <div class="form-step-desc">Ces questions nous permettent de préparer des recommandations personnalisées avant même notre premier échange.</div>
+
+        <div class="form-group">
+          <label class="form-label">Quel est votre principal frein de croissance actuellement ? <span class="req">*</span></label>
+          <div class="form-radio-group">
+            <label class="form-radio"><input type="radio" name="frein" value="Manque de clients"/><span>Manque de clients / prospection insuffisante</span></label>
+            <label class="form-radio"><input type="radio" name="frein" value="Organisation interne"/><span>Organisation interne chaotique / processus non définis</span></label>
+            <label class="form-radio"><input type="radio" name="frein" value="Manque de visibilité digitale"/><span>Manque de visibilité et de présence digitale</span></label>
+            <label class="form-radio"><input type="radio" name="frein" value="Équipe & recrutement"/><span>Problèmes d'équipe, de recrutement ou de délégation</span></label>
+            <label class="form-radio"><input type="radio" name="frein" value="Trésorerie & finances"/><span>Trésorerie tendue ou problèmes financiers</span></label>
+            <label class="form-radio"><input type="radio" name="frein" value="Autre frein"/><span>Autre raison</span></label>
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label">Avez-vous déjà tenté des solutions pour résoudre ce frein ?</label>
+          <div class="form-radio-group">
+            <label class="form-radio"><input type="radio" name="tentatives" value="Non, c'est la première démarche"/><span>Non, c'est la première fois que j'entreprends une démarche</span></label>
+            <label class="form-radio"><input type="radio" name="tentatives" value="Oui, sans succès"/><span>Oui, mais sans résultat satisfaisant</span></label>
+            <label class="form-radio"><input type="radio" name="tentatives" value="Oui, avec succès partiel"/><span>Oui, avec des résultats partiels</span></label>
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label">Comment gérez-vous actuellement votre relation client ?</label>
+          <select class="form-select" id="gestion_client">
+            <option value="">Sélectionner</option>
+            <option>Cahier / agenda papier</option>
+            <option>Excel / Google Sheets</option>
+            <option>WhatsApp uniquement</option>
+            <option>CRM (précisez dans la description)</option>
+            <option>Aucune gestion formalisée</option>
+          </select>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label">Quel résultat concret attendez-vous de notre collaboration ?</label>
+          <textarea class="form-textarea" id="resultat_attendu" rows="3" placeholder="Ex. : Augmenter mon CA de 30% en 6 mois, structurer mes processus pour pouvoir déléguer, lancer ma boutique en ligne..."></textarea>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label">Informations supplémentaires (optionnel)</label>
+          <textarea class="form-textarea" id="infos_plus" rows="2" placeholder="Tout ce qui pourrait nous aider à préparer un échange de qualité..."></textarea>
+        </div>
+        <div class="form-nav">
+          <button class="btn-outline" onclick="prevStep(4)">← Retour</button>
+          <button class="btn-green" onclick="nextStep(4)">Continuer →</button>
+        </div>
+      </div>
+
+      <!-- ÉTAPE 5 : CONTACT -->
+      <div class="form-section" id="step5">
+        <div class="form-step-title">Vos coordonnées de contact</div>
+        <div class="form-step-desc">Pour vous recontacter et confirmer votre rendez-vous.</div>
+        <div class="form-grid">
+          <div class="form-group">
+            <label class="form-label">Téléphone / WhatsApp <span class="req">*</span></label>
+            <input class="form-input" type="tel" id="telephone" placeholder="+225 07 00 00 00 00"/>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Email <span class="req">*</span></label>
+            <input class="form-input" type="email" id="email" placeholder="vous@exemple.com"/>
+          </div>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Ville / Pays</label>
+          <input class="form-input" type="text" id="ville" placeholder="Abidjan, Côte d'Ivoire"/>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Moyen de contact préféré</label>
+          <div class="form-radio-group" style="flex-direction:row;flex-wrap:wrap;">
+            <label class="form-radio" style="flex:1;min-width:140px;"><input type="radio" name="contact_pref" value="WhatsApp" checked/><span>📱 WhatsApp</span></label>
+            <label class="form-radio" style="flex:1;min-width:140px;"><input type="radio" name="contact_pref" value="Appel téléphonique"/><span>📞 Appel</span></label>
+            <label class="form-radio" style="flex:1;min-width:140px;"><input type="radio" name="contact_pref" value="Email"/><span>📧 Email</span></label>
+            <label class="form-radio" style="flex:1;min-width:140px;"><input type="radio" name="contact_pref" value="Visio (Zoom/Meet)"/><span>💻 Visio</span></label>
+          </div>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Créneaux disponibles (optionnel)</label>
+          <input class="form-input" type="text" id="creneaux" placeholder="Ex. : Lundi & mercredi matin, après 17h en semaine..."/>
+        </div>
+        <div class="form-group">
+          <div class="form-check">
+            <input type="checkbox" id="consent"/>
+            <span>J'accepte que mes données soient utilisées par ACDEES pour traiter ma demande de rendez-vous, conformément à la <a href="confidentialite.html">politique de confidentialité</a>.</span>
+          </div>
+        </div>
+        <div class="form-nav">
+          <button class="btn-outline" onclick="prevStep(5)">← Retour</button>
+          <button class="btn-green" id="submit-btn" onclick="submitForm()">Confirmer ma demande ✓</button>
+        </div>
+      </div>
+
+      <!-- SUCCÈS -->
+      <div class="form-section" id="step-success">
+        <div class="success-box">
+          <div class="success-icon">✅</div>
+          <h3>Demande envoyée avec succès !</h3>
+          <p>Merci <strong id="success-name"></strong> ! Notre équipe vous recontacte sous <strong>24 heures ouvrables</strong> pour confirmer votre rendez-vous.</p>
+          <p style="margin-top:10px;font-size:.82rem;color:rgba(255,255,255,.4);">En attendant, vous pouvez nous contacter directement sur WhatsApp pour un retour immédiat.</p>
+          <div style="display:flex;gap:12px;justify-content:center;margin-top:28px;flex-wrap:wrap;">
+            <a href="https://wa.me/2250711615439" class="btn-green" target="_blank">💬 WhatsApp</a>
+            <a href="index.html" class="btn-outline">Retour à l'accueil</a>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- SIDEBAR -->
+  <div class="rdv-sidebar">
+    <div class="sidebar-card">
+      <h3>Nous contacter directement</h3>
+      <div class="contact-item">
+        <div class="contact-icon">📱</div>
+        <div>
+          <div class="contact-label">WhatsApp & Appel</div>
+          <div class="contact-value"><a href="tel:+2250711615439">+225 07 11 61 54 39</a></div>
+          <div class="contact-value"><a href="tel:+2250171016141">+225 01 71 01 61 41</a></div>
+        </div>
+      </div>
+      <div class="contact-item">
+        <div class="contact-icon">📧</div>
+        <div>
+          <div class="contact-label">Email</div>
+          <div class="contact-value"><a href="mailto:contact@acdees.ci">contact@acdees.ci</a></div>
+        </div>
+      </div>
+      <div class="contact-item">
+        <div class="contact-icon">📍</div>
+        <div>
+          <div class="contact-label">Localisation</div>
+          <div class="contact-value">Abidjan, Côte d'Ivoire</div>
+        </div>
+      </div>
+      <div class="contact-item">
+        <div class="contact-icon">🕐</div>
+        <div>
+          <div class="contact-label">Disponibilité</div>
+          <div class="contact-value">Lun – Sam · 8h à 19h</div>
+        </div>
+      </div>
+      <a href="https://wa.me/2250711615439?text=Bonjour%20ACDEES%2C%20je%20souhaite%20prendre%20un%20rendez-vous." class="btn-green" target="_blank" style="display:block;text-align:center;margin-top:16px;">💬 Écrire sur WhatsApp</a>
+    </div>
+
+    <div class="sidebar-card">
+      <h3>Pourquoi ce diagnostic ?</h3>
+      <ul class="why-rdv-list">
+        <li>100% gratuit, sans engagement</li>
+        <li>30 minutes suffisent pour identifier vos leviers</li>
+        <li>Recommandations personnalisées immédiatement</li>
+        <li>Experts disponibles en français</li>
+        <li>Suivi même après le rendez-vous</li>
+      </ul>
+    </div>
+
+    <div class="sidebar-card" style="background:linear-gradient(135deg,rgba(31,122,61,.15),rgba(212,175,55,.06));border-color:var(--border-green);">
+      <div style="font-size:2rem;margin-bottom:10px;">⭐</div>
+      <p style="font-family:'Playfair Display',serif;font-style:italic;font-size:.92rem;color:rgba(255,255,255,.8);line-height:1.7;">
+        "Le diagnostic gratuit m'a permis de comprendre pourquoi mon entreprise stagnait. Deux mois après, mes revenus ont augmenté de 40%."
+      </p>
+      <div style="margin-top:14px;font-size:.78rem;color:rgba(255,255,255,.45);">— Konan D., Entrepreneur, Abidjan</div>
+    </div>
+  </div>
+</div>
+
+<div id="footer-placeholder"></div>
+
+<script src="shared.js"></script>
+<script>
+  document.getElementById('nav-placeholder').innerHTML = ACDEES.nav();
+  document.getElementById('footer-placeholder').innerHTML = ACDEES.footer();
+
+  let currentStep = 1;
+  const totalSteps = 5;
+  const budgetLabels = [
+    'Moins de 50 000 FCFA',
+    '50 000 – 150 000 FCFA',
+    '150 000 – 500 000 FCFA',
+    '500 000 – 1 500 000 FCFA',
+    '1 500 000 – 5 000 000 FCFA',
+    'Plus de 5 000 000 FCFA'
+  ];
+
+  function selectType(el, val) {
+    document.querySelectorAll('.type-card').forEach(c => c.classList.remove('selected'));
+    el.classList.add('selected');
+    document.getElementById('rdv_type').value = val;
+  }
+
+  function updateBudget(v) {
+    const label = budgetLabels[v];
+    document.getElementById('budget_display').textContent = label;
+    document.getElementById('budget').value = label;
+    document.getElementById('budget_fill').style.width = (v / 5 * 100) + '%';
+  }
+
+  function updateStepper(step) {
+    for (let i = 1; i <= totalSteps; i++) {
+      const sn = document.getElementById('sn' + i);
+      const sl = document.getElementById('sl' + i);
+      if (i < step) { sn.className = 'step-num done'; sn.textContent = '✓'; }
+      else if (i === step) { sn.className = 'step-num active'; sn.textContent = i; }
+      else { sn.className = 'step-num'; sn.textContent = i; }
+      if (sl) { sl.className = 'step-label' + (i === step ? ' active' : ''); }
+    }
+    for (let i = 1; i <= 4; i++) {
+      const line = document.getElementById('sl-' + i);
+      if (line) line.className = 'step-line' + (i < step ? ' done' : '');
+    }
+  }
+
+  function showStep(s) {
+    document.querySelectorAll('.form-section').forEach(el => el.classList.remove('active'));
+    document.getElementById('step' + s)?.classList.add('active');
+    updateStepper(s);
+    currentStep = s;
+    window.scrollTo({ top: 200, behavior: 'smooth' });
+  }
+
+  function showAlert(msg, type) {
+    const a = document.getElementById('alert');
+    a.textContent = msg;
+    a.className = 'alert alert-' + type;
+    a.style.display = 'block';
+    setTimeout(() => { a.style.display = 'none'; }, 5000);
+  }
+
+  function nextStep(from) {
+    // Validations
+    if (from === 2) {
+      if (!document.getElementById('nom').value.trim()) { showAlert('Veuillez entrer votre nom.', 'error'); return; }
+      if (!document.getElementById('secteur').value) { showAlert('Veuillez sélectionner votre secteur.', 'error'); return; }
+    }
+    if (from === 3) {
+      const checked = document.querySelectorAll('#services_check input:checked');
+      if (checked.length === 0) { showAlert('Veuillez sélectionner au moins un service.', 'error'); return; }
+    }
+    if (from === 4) {
+      if (!document.querySelector('input[name="frein"]:checked')) { showAlert('Veuillez sélectionner votre principal frein.', 'error'); return; }
+    }
+    showStep(from + 1);
+  }
+
+  function prevStep(from) { showStep(from - 1); }
+
+  function submitForm() {
+    const tel = document.getElementById('telephone').value.trim();
+    const email = document.getElementById('email').value.trim();
+    const consent = document.getElementById('consent').checked;
+    if (!tel) { showAlert('Veuillez entrer votre numéro de téléphone.', 'error'); return; }
+    if (!email || !email.includes('@')) { showAlert('Veuillez entrer une adresse email valide.', 'error'); return; }
+    if (!consent) { showAlert('Veuillez accepter la politique de confidentialité.', 'error'); return; }
+
+    const btn = document.getElementById('submit-btn');
+    btn.textContent = 'Envoi en cours...';
+    btn.disabled = true;
+
+    // Collect data
+    const services = [...document.querySelectorAll('#services_check input:checked')].map(i => i.value).join(', ');
+    const data = {
+      type: document.getElementById('rdv_type').value,
+      nom: document.getElementById('nom').value,
+      entreprise: document.getElementById('entreprise').value,
+      secteur: document.getElementById('secteur').value,
+      taille: document.getElementById('taille').value,
+      anciennete: document.getElementById('anciennete').value,
+      activite: document.getElementById('activite_desc').value,
+      services,
+      budget: document.getElementById('budget').value,
+      delai: document.getElementById('delai').value,
+      frein: document.querySelector('input[name="frein"]:checked')?.value || '',
+      tentatives: document.querySelector('input[name="tentatives"]:checked')?.value || '',
+      gestion_client: document.getElementById('gestion_client').value,
+      resultat: document.getElementById('resultat_attendu').value,
+      telephone: tel,
+      email,
+      ville: document.getElementById('ville').value,
+      contact_pref: document.querySelector('input[name="contact_pref"]:checked')?.value || '',
+      creneaux: document.getElementById('creneaux').value,
+      date: new Date().toLocaleDateString('fr-FR')
+    };
+
+    // Store locally for demo
+    localStorage.setItem('rdv_' + Date.now(), JSON.stringify(data));
+
+    setTimeout(() => {
+      document.querySelectorAll('.form-section').forEach(el => el.classList.remove('active'));
+      document.getElementById('step-success').classList.add('active');
+      document.getElementById('success-name').textContent = data.nom.split(' ')[0];
+      document.getElementById('stepper').style.display = 'none';
+    }, 1000);
+  }
+</script>
+</body>
+</html>

@@ -1,0 +1,230 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Contact — ACDEES</title>
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,600;0,700;1,400&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet"/>
+  <link rel="stylesheet" href="shared.css"/>
+  <style>
+    .contact-layout { display:grid; grid-template-columns:1fr 420px; gap:56px; padding:80px 64px; max-width:1280px; margin:0 auto; }
+    .contact-form-card { background:var(--surface); border:1px solid var(--border); border-radius:16px; padding:44px; }
+    .contact-form-card h2 { font-family:'Playfair Display',serif; font-size:1.5rem; margin-bottom:6px; }
+    .contact-form-card > p { font-size:.85rem; color:rgba(255,255,255,.45); margin-bottom:32px; }
+
+    .contact-methods { display:flex; flex-direction:column; gap:16px; }
+    .contact-method {
+      background:var(--surface); border:1px solid var(--border);
+      border-radius:14px; padding:24px 22px;
+      display:flex; align-items:center; gap:18px;
+      transition:border-color .3s,background .3s; text-decoration:none;
+    }
+    .contact-method:hover { border-color:var(--border-green); background:rgba(31,122,61,.06); }
+    .method-icon { width:52px; height:52px; flex-shrink:0; border-radius:12px; display:flex; align-items:center; justify-content:center; font-size:1.4rem; }
+    .method-icon.green { background:var(--green-glow); border:1px solid var(--border-green); }
+    .method-icon.gold { background:rgba(212,175,55,.1); border:1px solid var(--border-gold); }
+    .method-icon.blue { background:rgba(59,130,246,.1); border:1px solid rgba(59,130,246,.2); }
+    .method-label { font-size:.68rem; letter-spacing:.14em; text-transform:uppercase; color:rgba(255,255,255,.35); margin-bottom:4px; }
+    .method-value { font-size:.92rem; color:var(--white); font-weight:400; }
+    .method-sub { font-size:.75rem; color:rgba(255,255,255,.4); margin-top:2px; }
+    .method-arrow { margin-left:auto; color:rgba(255,255,255,.2); font-size:1.1rem; transition:color .3s,transform .3s; }
+    .contact-method:hover .method-arrow { color:var(--gold); transform:translateX(4px); }
+
+    .hours-card { background:rgba(31,122,61,.08); border:1px solid var(--border-green); border-radius:14px; padding:24px; margin-top:20px; }
+    .hours-card h4 { font-size:.72rem; letter-spacing:.16em; text-transform:uppercase; color:var(--gold); margin-bottom:14px; }
+    .hours-row { display:flex; justify-content:space-between; font-size:.83rem; margin-bottom:8px; }
+    .hours-row span:first-child { color:rgba(255,255,255,.5); }
+    .hours-row span:last-child { color:rgba(255,255,255,.8); }
+    .online-badge { display:inline-flex; align-items:center; gap:6px; font-size:.72rem; color:#6ee7a0; margin-top:8px; }
+    .online-dot { width:6px; height:6px; background:#6ee7a0; border-radius:50%; animation:pulse 2s infinite; }
+
+    .map-placeholder { background:var(--surface); border:1px solid var(--border); border-radius:14px; height:220px; display:flex; align-items:center; justify-content:center; flex-direction:column; gap:10px; margin-top:20px; color:rgba(255,255,255,.3); font-size:.85rem; }
+
+    @media(max-width:1024px){ .contact-layout{ grid-template-columns:1fr; } }
+    @media(max-width:600px){ .contact-layout{ padding:48px 16px; } .contact-form-card{ padding:24px 16px; } }
+  </style>
+</head>
+<body>
+<div id="nav-placeholder"></div>
+
+<div class="page-hero">
+  <div class="page-hero-grid"></div>
+  <div class="page-hero-inner">
+    <div class="breadcrumb"><a href="index.html">Accueil</a> › <span>Contact</span></div>
+    <div class="page-eyebrow">Nous sommes là pour vous</div>
+    <h1 class="page-title">Contactez <span>ACDEES</span></h1>
+    <p class="page-subtitle">Une question, un projet, une urgence ? Notre équipe vous répond en moins de 24 heures. Disponibles par WhatsApp, téléphone, email ou en présentiel.</p>
+  </div>
+</div>
+
+<div class="contact-layout">
+  <!-- FORM -->
+  <div>
+    <div class="contact-form-card" id="contact-form">
+      <h2>Envoyez-nous un message</h2>
+      <p>Décrivez votre demande et nous vous revenons rapidement avec une réponse adaptée.</p>
+      <div id="alert-contact" class="alert"></div>
+
+      <div class="form-grid">
+        <div class="form-group">
+          <label class="form-label">Nom complet <span class="req">*</span></label>
+          <input class="form-input" type="text" id="c_nom" placeholder="Prénom Nom"/>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Entreprise</label>
+          <input class="form-input" type="text" id="c_entreprise" placeholder="Ma Société"/>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Téléphone / WhatsApp <span class="req">*</span></label>
+          <input class="form-input" type="tel" id="c_tel" placeholder="+225 07 00 00 00 00"/>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Email <span class="req">*</span></label>
+          <input class="form-input" type="email" id="c_email" placeholder="vous@exemple.com"/>
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label class="form-label">Objet de votre message <span class="req">*</span></label>
+        <select class="form-select" id="c_objet">
+          <option value="">Sélectionner</option>
+          <option>Demande d'information sur les services</option>
+          <option>Demande de devis</option>
+          <option>Prendre un rendez-vous</option>
+          <option>Questions sur les formations</option>
+          <option>Partenariat / Collaboration</option>
+          <option>Réclamation / Assistance</option>
+          <option>Autre</option>
+        </select>
+      </div>
+
+      <div class="form-group">
+        <label class="form-label">Votre message <span class="req">*</span></label>
+        <textarea class="form-textarea" id="c_message" rows="5" placeholder="Décrivez votre demande, votre contexte, vos questions..."></textarea>
+      </div>
+
+      <div class="form-group">
+        <div class="form-check">
+          <input type="checkbox" id="c_consent"/>
+          <span>J'accepte que mes données soient utilisées par ACDEES pour traiter ma demande, conformément à la <a href="confidentialite.html">politique de confidentialité</a>.</span>
+        </div>
+      </div>
+
+      <button class="btn-green" onclick="submitContact()" style="width:100%;padding:16px;">
+        📤 Envoyer le message
+      </button>
+    </div>
+
+    <div class="contact-form-card" id="contact-success" style="display:none;text-align:center;padding:52px 40px;">
+      <div style="font-size:3.5rem;margin-bottom:20px;">💌</div>
+      <h3 style="font-family:'Playfair Display',serif;font-size:1.5rem;margin-bottom:14px;">Message reçu !</h3>
+      <p style="color:rgba(255,255,255,.6);line-height:1.8;max-width:400px;margin:0 auto 28px;">Notre équipe vous répond sous <strong>24 heures ouvrables</strong>. Pour une réponse immédiate, écrivez-nous sur WhatsApp.</p>
+      <div style="display:flex;gap:12px;justify-content:center;flex-wrap:wrap;">
+        <a href="https://wa.me/2250711615439" class="btn-green" target="_blank">💬 WhatsApp immédiat</a>
+        <a href="index.html" class="btn-outline">Retour à l'accueil</a>
+      </div>
+    </div>
+  </div>
+
+  <!-- SIDEBAR -->
+  <div>
+    <div class="contact-methods">
+      <a class="contact-method" href="https://wa.me/2250711615439?text=Bonjour%20ACDEES%2C%20j%27ai%20une%20question." target="_blank">
+        <div class="method-icon green">💬</div>
+        <div>
+          <div class="method-label">WhatsApp — Réponse immédiate</div>
+          <div class="method-value">+225 07 11 61 54 39</div>
+          <div class="method-sub">Cliquez pour ouvrir WhatsApp</div>
+        </div>
+        <span class="method-arrow">→</span>
+      </a>
+      <a class="contact-method" href="tel:+2250711615439">
+        <div class="method-icon green">📞</div>
+        <div>
+          <div class="method-label">Téléphone principal</div>
+          <div class="method-value">+225 07 11 61 54 39</div>
+          <div class="method-sub">Lun – Sam · 8h à 19h</div>
+        </div>
+        <span class="method-arrow">→</span>
+      </a>
+      <a class="contact-method" href="tel:+2250171016141">
+        <div class="method-icon green">📱</div>
+        <div>
+          <div class="method-label">Ligne secondaire</div>
+          <div class="method-value">+225 01 71 01 61 41</div>
+          <div class="method-sub">Lun – Sam · 8h à 19h</div>
+        </div>
+        <span class="method-arrow">→</span>
+      </a>
+      <a class="contact-method" href="mailto:contact@acdees.ci">
+        <div class="method-icon gold">📧</div>
+        <div>
+          <div class="method-label">Email professionnel</div>
+          <div class="method-value">contact@acdees.ci</div>
+          <div class="method-sub">Réponse sous 24h ouvrables</div>
+        </div>
+        <span class="method-arrow">→</span>
+      </a>
+      <a class="contact-method" href="https://maps.google.com/?q=Abidjan" target="_blank" rel="noopener">
+        <div class="method-icon blue">📍</div>
+        <div>
+          <div class="method-label">Adresse</div>
+          <div class="method-value">Abidjan, Côte d'Ivoire</div>
+          <div class="method-sub">Sur RDV uniquement</div>
+        </div>
+        <span class="method-arrow">→</span>
+      </a>
+    </div>
+
+    <div class="hours-card">
+      <h4>Heures d'ouverture</h4>
+      <div class="hours-row"><span>Lundi – Vendredi</span><span>8h00 – 19h00</span></div>
+      <div class="hours-row"><span>Samedi</span><span>9h00 – 17h00</span></div>
+      <div class="hours-row"><span>Dimanche</span><span>Fermé</span></div>
+      <div class="online-badge"><span class="online-dot"></span>Support WhatsApp disponible 24h/24</div>
+    </div>
+
+    <div class="map-placeholder">
+      <span style="font-size:2rem;">📍</span>
+      <span>Abidjan, Côte d'Ivoire</span>
+      <a href="rendez-vous.html" class="btn-green" style="margin-top:8px;font-size:.75rem;padding:10px 22px;">Prendre RDV en présentiel</a>
+    </div>
+  </div>
+</div>
+
+<div id="footer-placeholder"></div>
+<script src="shared.js"></script>
+<script>
+  document.getElementById('nav-placeholder').innerHTML = ACDEES.nav('contact');
+  document.getElementById('footer-placeholder').innerHTML = ACDEES.footer();
+  ACDEES.revealInit();
+
+  function submitContact() {
+    const nom = document.getElementById('c_nom').value.trim();
+    const tel = document.getElementById('c_tel').value.trim();
+    const email = document.getElementById('c_email').value.trim();
+    const objet = document.getElementById('c_objet').value;
+    const message = document.getElementById('c_message').value.trim();
+    const consent = document.getElementById('c_consent').checked;
+
+    const showErr = msg => {
+      const a = document.getElementById('alert-contact');
+      a.textContent = msg; a.className = 'alert alert-error'; a.style.display = 'block';
+      setTimeout(() => a.style.display = 'none', 4000);
+    };
+
+    if (!nom) return showErr('Veuillez entrer votre nom.');
+    if (!tel) return showErr('Veuillez entrer votre téléphone.');
+    if (!email || !email.includes('@')) return showErr('Email invalide.');
+    if (!objet) return showErr('Veuillez sélectionner un objet.');
+    if (!message) return showErr('Veuillez écrire votre message.');
+    if (!consent) return showErr('Veuillez accepter la politique de confidentialité.');
+
+    localStorage.setItem('contact_' + Date.now(), JSON.stringify({ nom, tel, email, objet, message, date: new Date().toLocaleDateString('fr-FR') }));
+
+    document.getElementById('contact-form').style.display = 'none';
+    document.getElementById('contact-success').style.display = 'block';
+  }
+</script>
+</body>
+</html>

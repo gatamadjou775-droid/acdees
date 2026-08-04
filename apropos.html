@@ -1,0 +1,214 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>À Propos — ACDEES</title>
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,600;0,700;1,400&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet"/>
+  <link rel="stylesheet" href="shared.css"/>
+  <style>
+    .about-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 80px; align-items: center; padding: 90px 64px; }
+    .about-img { border-radius: 16px; overflow: hidden; height: 500px; position: relative; }
+    .about-img img { width:100%; height:100%; object-fit:cover; filter:brightness(.75); }
+    .about-img::after { content:''; position:absolute; inset:0; background:linear-gradient(135deg,rgba(31,122,61,.25),transparent); }
+    .about-img-badge { position:absolute; bottom:24px; left:24px; z-index:2; background:var(--gold); color:var(--navy); font-size:.72rem; font-weight:700; letter-spacing:.12em; text-transform:uppercase; padding:10px 22px; border-radius:100px; }
+
+    .vmv-grid { display:grid; grid-template-columns:repeat(3,1fr); gap:24px; padding:0 64px 90px; }
+    .vmv-card { background:var(--surface); border:1px solid var(--border); border-radius:14px; padding:36px 28px; }
+    .vmv-icon { font-size:2rem; margin-bottom:16px; }
+    .vmv-title { font-family:'Playfair Display',serif; font-size:1.15rem; color:var(--white); margin-bottom:12px; }
+    .vmv-text { font-size:.85rem; color:rgba(255,255,255,.55); line-height:1.85; }
+
+    .values-section { padding:90px 64px; background:var(--navy2); }
+    .values-grid { display:grid; grid-template-columns:repeat(4,1fr); gap:20px; margin-top:52px; }
+    .value-card { background:var(--surface); border:1px solid var(--border); border-radius:14px; padding:28px 22px; text-align:center; transition:transform .3s,border-color .3s; }
+    .value-card:hover { transform:translateY(-5px); border-color:var(--border-green); }
+    .value-icon { font-size:2rem; margin-bottom:14px; }
+    .value-name { font-family:'Playfair Display',serif; font-size:1rem; color:var(--white); margin-bottom:8px; }
+    .value-desc { font-size:.78rem; color:rgba(255,255,255,.45); line-height:1.7; }
+
+    .founder-section { padding:90px 64px; display:grid; grid-template-columns:360px 1fr; gap:72px; align-items:start; }
+    .founder-card { background:var(--surface); border:1px solid var(--border-gold); border-radius:16px; padding:32px; text-align:center; }
+    .founder-photo { width:160px; height:160px; border-radius:50%; margin:0 auto 20px; overflow:hidden; border:3px solid var(--gold); }
+    .founder-photo img { width:100%; height:100%; object-fit:cover; }
+    .founder-name { font-family:'Playfair Display',serif; font-size:1.3rem; color:var(--white); margin-bottom:6px; }
+    .founder-role { font-size:.75rem; letter-spacing:.14em; text-transform:uppercase; color:var(--gold); margin-bottom:16px; }
+    .founder-socials { display:flex; justify-content:center; gap:10px; margin-top:16px; }
+    .social-btn { background:rgba(255,255,255,.05); border:1px solid var(--border); border-radius:8px; padding:8px 16px; font-size:.75rem; color:rgba(255,255,255,.5); text-decoration:none; transition:all .3s; }
+    .social-btn:hover { border-color:var(--gold); color:var(--gold); }
+    .founder-bio h3 { font-family:'Playfair Display',serif; font-size:1.8rem; margin-bottom:16px; }
+    .founder-bio p { font-size:.92rem; color:rgba(255,255,255,.6); line-height:1.9; margin-bottom:18px; }
+    .founder-quote { border-left:3px solid var(--green); padding:16px 20px; background:rgba(31,122,61,.07); border-radius:0 10px 10px 0; font-family:'Playfair Display',serif; font-style:italic; font-size:1rem; color:rgba(255,255,255,.8); line-height:1.7; margin-top:24px; }
+
+    .history-section { padding:90px 64px; }
+    .timeline { position:relative; padding-left:40px; margin-top:52px; }
+    .timeline::before { content:''; position:absolute; left:12px; top:0; bottom:0; width:2px; background:linear-gradient(to bottom,var(--green),var(--gold)); }
+    .timeline-item { position:relative; margin-bottom:44px; }
+    .timeline-dot { position:absolute; left:-34px; top:4px; width:16px; height:16px; border-radius:50%; background:var(--green); border:2px solid var(--navy); box-shadow:0 0 12px var(--green-glow); }
+    .timeline-year { font-size:.7rem; letter-spacing:.18em; text-transform:uppercase; color:var(--gold); margin-bottom:6px; }
+    .timeline-title { font-family:'Playfair Display',serif; font-size:1.1rem; color:var(--white); margin-bottom:8px; }
+    .timeline-text { font-size:.85rem; color:rgba(255,255,255,.5); line-height:1.8; max-width:600px; }
+
+    .stats-about { display:grid; grid-template-columns:repeat(4,1fr); gap:20px; padding:70px 64px; background:var(--navy2); border-top:1px solid var(--border); }
+    .stat-about-item { text-align:center; }
+    .stat-about-num { font-family:'Playfair Display',serif; font-size:2.8rem; color:var(--gold); line-height:1; }
+    .stat-about-label { font-size:.78rem; color:rgba(255,255,255,.45); margin-top:8px; }
+
+    @media(max-width:900px){
+      .about-grid,.founder-section{ grid-template-columns:1fr; gap:40px; padding:60px 20px; }
+      .vmv-grid,.values-section,.history-section{ padding:60px 20px; }
+      .vmv-grid{ grid-template-columns:1fr; }
+      .values-grid{ grid-template-columns:1fr 1fr; }
+      .stats-about{ grid-template-columns:1fr 1fr; padding:50px 20px; }
+    }
+  </style>
+</head>
+<body>
+<div id="nav-placeholder"></div>
+
+<div class="page-hero">
+  <div class="page-hero-grid"></div>
+  <div class="page-hero-inner">
+    <div class="breadcrumb"><a href="index.html">Accueil</a> › <span>À propos</span></div>
+    <div class="page-eyebrow">Notre histoire & notre mission</div>
+    <h1 class="page-title">À propos <span>d'ACDEES</span></h1>
+    <p class="page-subtitle">Née d'une conviction profonde : les entreprises africaines méritent un accompagnement stratégique à la hauteur de leur potentiel.</p>
+  </div>
+</div>
+
+<!-- Intro -->
+<div class="about-grid reveal">
+  <div>
+    <p class="section-eyebrow">Qui sommes-nous</p>
+    <h2 class="section-title">Un cabinet construit <span>sur le terrain</span></h2>
+    <div class="green-divider"></div>
+    <p style="font-size:.95rem;color:rgba(255,255,255,.6);line-height:1.9;margin-bottom:18px;">ACDEES — Agence de Conseil, Digitalisation et Externalisation de Services — est un cabinet spécialisé dans l'accompagnement des entreprises africaines vers la structuration, la performance et la croissance durable.</p>
+    <p style="font-size:.95rem;color:rgba(255,255,255,.6);line-height:1.9;margin-bottom:18px;">Nous avons été fondés avec une certitude : trop d'entreprises locales peinent à se développer non pas par manque de talent ou d'ambition, mais par manque d'outils, de méthodes et d'accompagnement adapté à leur réalité.</p>
+    <p style="font-size:.95rem;color:rgba(255,255,255,.6);line-height:1.9;">Aujourd'hui, ACDEES accompagne plus de 100 entreprises, PME, startups et institutions à travers la Côte d'Ivoire et l'Afrique de l'Ouest.</p>
+    <div style="display:flex;gap:12px;flex-wrap:wrap;margin-top:32px;">
+      <a href="rendez-vous.html" class="btn-green">Travaillons ensemble →</a>
+      <a href="services.html" class="btn-outline">Voir nos services</a>
+    </div>
+  </div>
+  <div class="about-img">
+    <img src="https://images.unsplash.com/photo-1556761175-4b46a572b786?w=800&q=80" alt="Équipe ACDEES"/>
+    <span class="about-img-badge">Abidjan, Côte d'Ivoire</span>
+  </div>
+</div>
+
+<!-- Vision Mission Valeurs -->
+<div class="vmv-grid">
+  <div class="vmv-card reveal">
+    <div class="vmv-icon">🔭</div>
+    <h3 class="vmv-title">Notre Vision</h3>
+    <p class="vmv-text">Être le partenaire stratégique de référence des entreprises africaines qui souhaitent se structurer, se digitaliser et atteindre leur plein potentiel sur les marchés locaux et internationaux.</p>
+  </div>
+  <div class="vmv-card reveal">
+    <div class="vmv-icon">🎯</div>
+    <h3 class="vmv-title">Notre Mission</h3>
+    <p class="vmv-text">Accompagner les entrepreneurs, PME et institutions dans leur transformation en leur apportant expertise, outils digitaux, intelligence artificielle et externalisation de services — avec des résultats mesurables.</p>
+  </div>
+  <div class="vmv-card reveal">
+    <div class="vmv-icon">⚡</div>
+    <h3 class="vmv-title">Notre Engagement</h3>
+    <p class="vmv-text">Chaque mandat est traité avec rigueur et personnalisation. Nous ne livrons pas des rapports — nous co-construisons des solutions, formons les équipes et restons aux côtés de nos clients jusqu'à l'atteinte des objectifs.</p>
+  </div>
+</div>
+
+<!-- Valeurs -->
+<div class="values-section">
+  <div class="reveal" style="text-align:center;">
+    <p class="section-eyebrow">Ce qui nous guide</p>
+    <h2 class="section-title">Nos <span>valeurs fondamentales</span></h2>
+  </div>
+  <div class="values-grid">
+    <div class="value-card reveal"><div class="value-icon">🏆</div><h4 class="value-name">Excellence</h4><p class="value-desc">Chaque livrable est soumis à nos standards les plus élevés. Pas de demi-mesure.</p></div>
+    <div class="value-card reveal"><div class="value-icon">🤝</div><h4 class="value-name">Intégrité</h4><p class="value-desc">Transparence totale sur nos méthodes, nos prix et nos limites. Vous savez toujours où vous en êtes.</p></div>
+    <div class="value-card reveal"><div class="value-icon">💡</div><h4 class="value-name">Innovation</h4><p class="value-desc">Nous intégrons les technologies les plus récentes pour vous donner un avantage décisif.</p></div>
+    <div class="value-card reveal"><div class="value-icon">📊</div><h4 class="value-name">Performance</h4><p class="value-desc">Nos recommandations sont fondées sur des données. Les résultats se mesurent, toujours.</p></div>
+  </div>
+</div>
+
+<!-- Fondateur -->
+<div class="founder-section">
+  <div class="founder-card reveal">
+    <div class="founder-photo">
+      <img src="fondateur.png" alt="GATA MADJOU PYRRHUS — Fondateur ACDEES"/>
+    </div>
+    <div class="founder-name">GATA MADJOU PYRRHUS</div>
+    <div class="founder-role">CEO & Directeur Stratégique · ACDEES</div>
+    <p style="font-size:.82rem;color:rgba(255,255,255,.45);line-height:1.7;">Expert en conseil stratégique, digitalisation et transformation organisationnelle. Passionné par l'entrepreneuriat africain.</p>
+    <div class="founder-socials">
+      <a href="https://linkedin.com" target="_blank" rel="noopener" class="social-btn">LinkedIn</a>
+      <a href="https://wa.me/2250711615439" class="social-btn" target="_blank">WhatsApp</a>
+    </div>
+  </div>
+  <div class="founder-bio reveal">
+    <p class="section-eyebrow">Le mot du fondateur</p>
+    <h3 class="section-title">Pourquoi <span>ACDEES</span> ?</h3>
+    <div class="green-divider"></div>
+    <p>L'idée d'ACDEES est née d'une frustration constructive. J'ai observé pendant des années des entrepreneurs talentueux, des idées brillantes, des marchés immenses — et pourtant, des entreprises qui stagnaient ou échouaient faute de structure, de méthode et d'outils adaptés.</p>
+    <p>En Côte d'Ivoire comme ailleurs en Afrique, l'ambition ne manque jamais. Ce qui manque souvent, c'est l'accès à un accompagnement stratégique de qualité, abordable et ancré dans les réalités locales.</p>
+    <p>ACDEES est notre réponse à ce manque. Un cabinet qui n'est pas là pour remettre des rapports, mais pour rester aux côtés de ses clients jusqu'à ce que les résultats soient au rendez-vous.</p>
+    <div class="founder-quote">
+      "Transformons votre vision en une entreprise structurée, performante et rentable. C'est plus qu'un slogan — c'est notre engagement quotidien."
+    </div>
+  </div>
+</div>
+
+<!-- Timeline -->
+<div class="history-section">
+  <p class="section-eyebrow reveal">Notre parcours</p>
+  <h2 class="section-title reveal">L'histoire <span>d'ACDEES</span></h2>
+  <div class="timeline">
+    <div class="timeline-item reveal">
+      <div class="timeline-dot"></div>
+      <div class="timeline-year">Création</div>
+      <h3 class="timeline-title">Naissance d'ACDEES</h3>
+      <p class="timeline-text">Fondée à Abidjan avec une mission claire : rendre accessible le conseil stratégique et la digitalisation aux entreprises africaines de toutes tailles.</p>
+    </div>
+    <div class="timeline-item reveal">
+      <div class="timeline-dot"></div>
+      <div class="timeline-year">Expansion</div>
+      <h3 class="timeline-title">Élargissement des services</h3>
+      <p class="timeline-text">Intégration de l'intelligence artificielle, du marketing digital et de l'externalisation dans notre offre. Les 50 premiers clients nous font confiance.</p>
+    </div>
+    <div class="timeline-item reveal">
+      <div class="timeline-dot"></div>
+      <div class="timeline-year">Digitalisation</div>
+      <h3 class="timeline-title">Lancement de la plateforme de formations</h3>
+      <p class="timeline-text">Partenariat avec Chariow pour proposer des formations en ligne. Plus de 300 apprenants forment leurs compétences avec ACDEES.</p>
+    </div>
+    <div class="timeline-item reveal">
+      <div class="timeline-dot"></div>
+      <div class="timeline-year">Aujourd'hui</div>
+      <h3 class="timeline-title">+100 entreprises accompagnées</h3>
+      <p class="timeline-text">ACDEES est désormais une référence reconnue en Côte d'Ivoire. Nous continuons à innover pour rester au service des entrepreneurs africains ambitieux.</p>
+    </div>
+  </div>
+</div>
+
+<!-- Stats -->
+<div class="stats-about">
+  <div class="stat-about-item reveal"><div class="stat-about-num">+100</div><div class="stat-about-label">Entreprises accompagnées</div></div>
+  <div class="stat-about-item reveal"><div class="stat-about-num">+500h</div><div class="stat-about-label">De conseil délivrées</div></div>
+  <div class="stat-about-item reveal"><div class="stat-about-num">95%</div><div class="stat-about-label">Taux de satisfaction</div></div>
+  <div class="stat-about-item reveal"><div class="stat-about-num">+50</div><div class="stat-about-label">Projets digitaux livrés</div></div>
+</div>
+
+<div style="background:linear-gradient(135deg,#0F2016,var(--green-dark),#0F2016);padding:80px 64px;text-align:center;">
+  <p class="section-eyebrow">Rejoignez l'aventure</p>
+  <h2 class="section-title" style="margin-bottom:16px;">Prêt à transformer <span>votre entreprise</span> ?</h2>
+  <p style="font-size:.92rem;color:rgba(255,255,255,.6);max-width:480px;margin:0 auto 36px;">Commençons par un diagnostic gratuit de 30 minutes. Sans engagement, sans jargon — juste une conversation franche sur votre situation et vos objectifs.</p>
+  <a href="rendez-vous.html" class="btn-green">Diagnostic gratuit →</a>
+</div>
+
+<div id="footer-placeholder"></div>
+<script src="shared.js"></script>
+<script>
+  document.getElementById('nav-placeholder').innerHTML = ACDEES.nav('apropos');
+  document.getElementById('footer-placeholder').innerHTML = ACDEES.footer();
+  ACDEES.revealInit();
+</script>
+</body>
+</html>

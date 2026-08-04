@@ -1,0 +1,522 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Services — ACDEES</title>
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,600;0,700;1,400&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet"/>
+  <link rel="stylesheet" href="shared.css"/>
+  <style>
+    .services-nav {
+      display: flex; gap: 10px; flex-wrap: wrap; margin: 40px 64px 0;
+      border-bottom: 1px solid var(--border); padding-bottom: 0;
+    }
+    .services-nav a {
+      font-size: .75rem; letter-spacing: .12em; text-transform: uppercase;
+      color: rgba(255,255,255,.45); text-decoration: none;
+      padding: 12px 20px; border-bottom: 2px solid transparent;
+      transition: color .3s, border-color .3s; white-space: nowrap;
+    }
+    .services-nav a:hover, .services-nav a.active { color: var(--gold); border-bottom-color: var(--gold); }
+
+    .service-block {
+      padding: 90px 64px;
+      display: grid; grid-template-columns: 1fr 1fr; gap: 80px; align-items: center;
+      border-bottom: 1px solid var(--border);
+    }
+    .service-block:nth-child(even) { background: var(--navy2); }
+    .service-block:nth-child(even) .service-img { order: -1; }
+
+    .service-icon-large {
+      width: 64px; height: 64px;
+      background: var(--green-glow); border: 1px solid var(--border-green);
+      border-radius: 14px; display: flex; align-items: center; justify-content: center;
+      font-size: 1.8rem; margin-bottom: 24px;
+    }
+    .service-block-title {
+      font-family: 'Playfair Display', serif; font-size: 2rem; font-weight: 700;
+      margin-bottom: 16px; color: var(--white);
+    }
+    .service-block-desc { font-size: .93rem; color: rgba(255,255,255,.6); line-height: 1.9; margin-bottom: 28px; }
+
+    .service-features { margin-bottom: 32px; }
+    .service-features h4 {
+      font-size: .7rem; letter-spacing: .18em; text-transform: uppercase;
+      color: var(--gold); margin-bottom: 14px;
+    }
+    .feature-list { list-style: none; display: flex; flex-direction: column; gap: 10px; }
+    .feature-list li {
+      display: flex; align-items: flex-start; gap: 10px;
+      font-size: .87rem; color: rgba(255,255,255,.7);
+    }
+    .feature-list li::before { content: '✦'; color: var(--green); font-size: .7rem; margin-top: 4px; flex-shrink: 0; }
+
+    .service-problems {
+      background: rgba(220,38,38,.05); border: 1px solid rgba(220,38,38,.12);
+      border-radius: 10px; padding: 20px 24px; margin-bottom: 20px;
+    }
+    .service-problems h4 { font-size: .7rem; letter-spacing: .14em; text-transform: uppercase; color: #fca5a5; margin-bottom: 10px; }
+    .service-problems li { font-size: .83rem; color: rgba(255,255,255,.55); margin-bottom: 6px; list-style: none; padding-left: 16px; position: relative; }
+    .service-problems li::before { content: '×'; position: absolute; left: 0; color: #fca5a5; }
+
+    .service-benefits {
+      background: rgba(31,122,61,.08); border: 1px solid var(--border-green);
+      border-radius: 10px; padding: 20px 24px; margin-bottom: 24px;
+    }
+    .service-benefits h4 { font-size: .7rem; letter-spacing: .14em; text-transform: uppercase; color: #6ee7a0; margin-bottom: 10px; }
+    .service-benefits li { font-size: .83rem; color: rgba(255,255,255,.55); margin-bottom: 6px; list-style: none; padding-left: 16px; position: relative; }
+    .service-benefits li::before { content: '✓'; position: absolute; left: 0; color: #6ee7a0; }
+
+    .service-actions { display: flex; gap: 12px; flex-wrap: wrap; }
+
+    .service-img {
+      border-radius: 16px; overflow: hidden; height: 400px; position: relative;
+    }
+    .service-img img { width: 100%; height: 100%; object-fit: cover; filter: brightness(.75); }
+    .service-img::after {
+      content: ''; position: absolute; inset: 0;
+      background: linear-gradient(135deg, rgba(31,122,61,.3), rgba(11,19,32,.2));
+    }
+    .service-img-badge {
+      position: absolute; bottom: 20px; left: 20px; z-index: 2;
+      background: var(--gold); color: var(--navy);
+      font-size: .7rem; font-weight: 600; letter-spacing: .12em; text-transform: uppercase;
+      padding: 8px 18px; border-radius: 100px;
+    }
+
+    .process-mini { margin-top: 32px; }
+    .process-mini h4 { font-size: .7rem; letter-spacing: .18em; text-transform: uppercase; color: var(--gold); margin-bottom: 16px; }
+    .process-mini-steps { display: flex; flex-direction: column; gap: 12px; }
+    .process-mini-step {
+      display: flex; gap: 14px; align-items: flex-start;
+    }
+    .process-mini-num {
+      width: 28px; height: 28px; flex-shrink: 0;
+      border-radius: 50%; background: var(--green-glow); border: 1px solid var(--border-green);
+      display: flex; align-items: center; justify-content: center;
+      font-size: .72rem; color: var(--gold); font-family: 'Playfair Display', serif;
+    }
+    .process-mini-text { font-size: .83rem; color: rgba(255,255,255,.6); line-height: 1.6; padding-top: 3px; }
+
+    .cta-band {
+      background: linear-gradient(135deg, #0F2016, var(--green-dark), #0F2016);
+      padding: 80px 64px; text-align: center;
+    }
+    .cta-band h2 { font-family: 'Playfair Display', serif; font-size: 2.2rem; margin-bottom: 16px; }
+    .cta-band p { color: rgba(255,255,255,.6); max-width: 500px; margin: 0 auto 40px; }
+    .cta-actions { display: flex; gap: 14px; justify-content: center; flex-wrap: wrap; }
+
+    @media(max-width:900px) {
+      .services-nav { margin: 20px 20px 0; }
+      .service-block { grid-template-columns: 1fr; gap: 40px; padding: 60px 20px; }
+      .service-block:nth-child(even) .service-img { order: 0; }
+      .cta-band { padding: 60px 20px; }
+    }
+  </style>
+</head>
+<body>
+<div id="nav-placeholder"></div>
+
+<!-- Services Nav -->
+<div class="services-nav">
+  <a href="#conseil" class="active">Conseil</a>
+  <a href="#digital">Digitalisation</a>
+  <a href="#ia">IA</a>
+  <a href="#commercial">Commercial</a>
+  <a href="#creation">Création Digitale</a>
+  <a href="#externalisation">Externalisation</a>
+  <a href="#marketing">Marketing</a>
+  <a href="#maintenance">Maintenance</a>
+</div>
+
+<!-- Page Hero -->
+<div class="page-hero">
+  <div class="page-hero-grid"></div>
+  <div class="page-hero-inner">
+    <div class="breadcrumb"><a href="index.html">Accueil</a> › <span>Services</span></div>
+    <div class="page-eyebrow">Ce que nous faisons</div>
+    <h1 class="page-title">Nos <span>Services</span></h1>
+    <p class="page-subtitle">Un écosystème complet de solutions pour structurer, digitaliser et accélérer la croissance de votre entreprise — de la stratégie à l'exécution.</p>
+  </div>
+</div>
+
+<!-- SERVICE 1 : CONSEIL -->
+<div id="conseil" class="service-block reveal">
+  <div class="service-content">
+    <div class="service-icon-large">🏛️</div>
+    <h2 class="service-block-title">Conseil & Structuration</h2>
+    <p class="service-block-desc">Nous diagnostiquons votre organisation de fond en comble et co-construisons un plan stratégique sur-mesure. Notre approche combine rigueur analytique et connaissance du terrain africain pour des recommandations immédiatement actionnables.</p>
+    <div class="service-features">
+      <h4>Nos prestations</h4>
+      <ul class="feature-list">
+        <li>Diagnostic complet de l'entreprise (organisation, finances, marché)</li>
+        <li>Audit organisationnel et cartographie des processus</li>
+        <li>Élaboration du plan stratégique 1–3 ans</li>
+        <li>Optimisation et modélisation des processus opérationnels</li>
+        <li>Accompagnement à la mise en œuvre et au pilotage</li>
+      </ul>
+    </div>
+    <div class="service-problems">
+      <h4>Problèmes résolus</h4>
+      <ul>
+        <li>Organisation floue, rôles mal définis</li>
+        <li>Manque de cap stratégique clair</li>
+        <li>Pertes liées à des processus inefficaces</li>
+        <li>Difficulté à scaler et à déléguer</li>
+      </ul>
+    </div>
+    <div class="service-benefits">
+      <h4>Bénéfices</h4>
+      <ul>
+        <li>Une vision claire et partagée par toutes les équipes</li>
+        <li>Des processus optimisés qui réduisent les coûts</li>
+        <li>Une base solide pour la croissance et l'investissement</li>
+        <li>Des décisions fondées sur des données fiables</li>
+      </ul>
+    </div>
+    <div class="service-actions">
+      <a href="rendez-vous.html" class="btn-green">Prendre RDV →</a>
+      <a href="devis.html" class="btn-outline">Demander un devis</a>
+    </div>
+  </div>
+  <div class="service-img">
+    <img src="https://images.unsplash.com/photo-1553877522-43269d4ea984?w=800&q=80" alt="Conseil stratégique" loading="lazy"/>
+    <span class="service-img-badge">Expertise #1</span>
+  </div>
+</div>
+
+<!-- SERVICE 2 : DIGITALISATION -->
+<div id="digital" class="service-block reveal">
+  <div class="service-content">
+    <div class="service-icon-large">⚡</div>
+    <h2 class="service-block-title">Digitalisation & Automatisation</h2>
+    <p class="service-block-desc">Nous transformons vos opérations manuelles en systèmes digitaux fluides et automatisés. CRM, workflows, gestion documentaire, tableaux de bord — vous pilotez votre activité en temps réel avec une précision chirurgicale.</p>
+    <div class="service-features">
+      <h4>Nos prestations</h4>
+      <ul class="feature-list">
+        <li>Déploiement et paramétrage de CRM (HubSpot, Zoho, Notion…)</li>
+        <li>Automatisation des workflows (Make, Zapier, n8n)</li>
+        <li>Gestion documentaire digitale (GED)</li>
+        <li>Tableaux de bord et reporting en temps réel</li>
+        <li>Intégration des outils métier et synchronisation des données</li>
+      </ul>
+    </div>
+    <div class="service-problems">
+      <h4>Problèmes résolus</h4>
+      <ul>
+        <li>Tâches répétitives chronophages et sources d'erreurs</li>
+        <li>Aucune visibilité sur la performance en temps réel</li>
+        <li>Informations éparpillées entre mails, tableurs, WhatsApp</li>
+      </ul>
+    </div>
+    <div class="service-benefits">
+      <h4>Bénéfices</h4>
+      <ul>
+        <li>Gain de temps moyen de 30 à 50% sur les tâches opérationnelles</li>
+        <li>Zéro perte d'information client</li>
+        <li>Pilotage précis avec des KPIs en temps réel</li>
+        <li>Équipes plus productives et moins sujettes aux erreurs</li>
+      </ul>
+    </div>
+    <div class="service-actions">
+      <a href="rendez-vous.html" class="btn-green">Prendre RDV →</a>
+      <a href="devis.html" class="btn-outline">Demander un devis</a>
+    </div>
+  </div>
+  <div class="service-img">
+    <img src="https://images.unsplash.com/photo-1551288049-bebda4e38f71?w=800&q=80" alt="Digitalisation" loading="lazy"/>
+    <span class="service-img-badge">Automatisation</span>
+  </div>
+</div>
+
+<!-- SERVICE 3 : IA -->
+<div id="ia" class="service-block reveal">
+  <div class="service-content">
+    <div class="service-icon-large">🤖</div>
+    <h2 class="service-block-title">Intelligence Artificielle</h2>
+    <p class="service-block-desc">L'IA n'est plus réservée aux grandes entreprises. Nous vous aidons à déployer des chatbots, agents IA et automations intelligentes qui travaillent pour vous 24h/24 — et formons vos équipes pour en tirer le meilleur parti.</p>
+    <div class="service-features">
+      <h4>Nos prestations</h4>
+      <ul class="feature-list">
+        <li>Conception et déploiement de chatbots IA (support, vente, RH)</li>
+        <li>Agents IA autonomes pour des tâches complexes</li>
+        <li>Automatisation IA de processus métier</li>
+        <li>Formation des équipes à l'utilisation des outils IA</li>
+        <li>Intégration IA dans vos outils existants</li>
+      </ul>
+    </div>
+    <div class="service-problems">
+      <h4>Problèmes résolus</h4>
+      <ul>
+        <li>Support client débordé, réponses lentes</li>
+        <li>Tâches répétitives à faible valeur ajoutée</li>
+        <li>Manque de compétences IA dans les équipes</li>
+      </ul>
+    </div>
+    <div class="service-benefits">
+      <h4>Bénéfices</h4>
+      <ul>
+        <li>Service client disponible 24h/24 sans coût supplémentaire</li>
+        <li>Économies sur les tâches opérationnelles</li>
+        <li>Avantage concurrentiel réel face aux concurrents</li>
+      </ul>
+    </div>
+    <div class="service-actions">
+      <a href="rendez-vous.html" class="btn-green">Prendre RDV →</a>
+      <a href="devis.html" class="btn-outline">Demander un devis</a>
+    </div>
+  </div>
+  <div class="service-img">
+    <img src="https://images.unsplash.com/photo-1677442135703-1787eea5ce01?w=800&q=80" alt="Intelligence Artificielle" loading="lazy"/>
+    <span class="service-img-badge">IA & Innovation</span>
+  </div>
+</div>
+
+<!-- SERVICE 4 : COMMERCIAL -->
+<div id="commercial" class="service-block reveal">
+  <div class="service-content">
+    <div class="service-icon-large">📈</div>
+    <h2 class="service-block-title">Développement Commercial</h2>
+    <p class="service-block-desc">Nous concevons et pilotons vos stratégies d'acquisition client sur les plateformes digitales les plus puissantes en Afrique. Des campagnes rentables, des tunnels de vente optimisés, et une croissance mesurable.</p>
+    <div class="service-features">
+      <h4>Nos prestations</h4>
+      <ul class="feature-list">
+        <li>Campagnes publicitaires Facebook & Instagram Ads</li>
+        <li>Campagnes TikTok Ads (audience jeune & mobile)</li>
+        <li>Conception de tunnels de vente haute conversion</li>
+        <li>Stratégie d'acquisition et de rétention client</li>
+        <li>Optimisation des coûts d'acquisition (CPA, ROAS)</li>
+      </ul>
+    </div>
+    <div class="service-problems">
+      <h4>Problèmes résolus</h4>
+      <ul>
+        <li>Peu ou pas de clients entrants en ligne</li>
+        <li>Publicités sans résultats concrets</li>
+        <li>Dépendance au bouche-à-oreille uniquement</li>
+      </ul>
+    </div>
+    <div class="service-benefits">
+      <h4>Bénéfices</h4>
+      <ul>
+        <li>Flux de prospects qualifiés et prévisibles</li>
+        <li>Retour sur investissement publicitaire mesurable</li>
+        <li>Croissance commerciale scalable et durable</li>
+      </ul>
+    </div>
+    <div class="service-actions">
+      <a href="rendez-vous.html" class="btn-green">Prendre RDV →</a>
+      <a href="devis.html" class="btn-outline">Demander un devis</a>
+    </div>
+  </div>
+  <div class="service-img">
+    <img src="https://images.unsplash.com/photo-1611162617213-7d7a39e9b1d7?w=800&q=80" alt="Développement commercial" loading="lazy"/>
+    <span class="service-img-badge">Croissance</span>
+  </div>
+</div>
+
+<!-- SERVICE 5 : CRÉATION DIGITALE -->
+<div id="creation" class="service-block reveal">
+  <div class="service-content">
+    <div class="service-icon-large">💻</div>
+    <h2 class="service-block-title">Création Digitale</h2>
+    <p class="service-block-desc">Nous concevons des présences digitales à la hauteur de votre ambition. Sites web performants, boutiques e-commerce, applications web et plateformes SaaS — chaque projet est conçu pour convertir et fidéliser.</p>
+    <div class="service-features">
+      <h4>Nos prestations</h4>
+      <ul class="feature-list">
+        <li>Sites web vitrines et institutionnels premium</li>
+        <li>Boutiques en ligne (e-commerce) optimisées conversion</li>
+        <li>Applications web sur-mesure</li>
+        <li>Plateformes SaaS et outils métier</li>
+        <li>Maintenance, hébergement et mises à jour</li>
+      </ul>
+    </div>
+    <div class="service-problems">
+      <h4>Problèmes résolus</h4>
+      <ul>
+        <li>Absence de présence digitale crédible</li>
+        <li>Site obsolète qui ne génère aucun lead</li>
+        <li>Aucun canal de vente en ligne</li>
+      </ul>
+    </div>
+    <div class="service-benefits">
+      <h4>Bénéfices</h4>
+      <ul>
+        <li>Image professionnelle qui inspire confiance</li>
+        <li>Génération de leads et de ventes en ligne 24h/24</li>
+        <li>Plateforme évolutive qui grandit avec vous</li>
+      </ul>
+    </div>
+    <div class="service-actions">
+      <a href="rendez-vous.html" class="btn-green">Prendre RDV →</a>
+      <a href="devis.html" class="btn-outline">Demander un devis</a>
+    </div>
+  </div>
+  <div class="service-img">
+    <img src="https://images.unsplash.com/photo-1547658719-da2b51169166?w=800&q=80" alt="Création digitale" loading="lazy"/>
+    <span class="service-img-badge">Design & Dev</span>
+  </div>
+</div>
+
+<!-- SERVICE 6 : EXTERNALISATION -->
+<div id="externalisation" class="service-block reveal">
+  <div class="service-content">
+    <div class="service-icon-large">🔄</div>
+    <h2 class="service-block-title">Externalisation de Services</h2>
+    <p class="service-block-desc">Confiez-nous vos fonctions support pour vous concentrer sur votre cœur de métier. Nous prenons en charge votre service client, community management, gestion administrative et support commercial avec rigueur et professionnalisme.</p>
+    <div class="service-features">
+      <h4>Nos prestations</h4>
+      <ul class="feature-list">
+        <li>Service client multicanal (chat, email, téléphone)</li>
+        <li>Community management (réseaux sociaux)</li>
+        <li>Gestion administrative et secrétariat à distance</li>
+        <li>Support commercial et suivi des opportunités</li>
+        <li>Permanence téléphonique et prise de RDV</li>
+      </ul>
+    </div>
+    <div class="service-problems">
+      <h4>Problèmes résolus</h4>
+      <ul>
+        <li>Fondateurs surchargés de tâches opérationnelles</li>
+        <li>Support client non géré ou de mauvaise qualité</li>
+        <li>Coût d'un employé à temps plein trop élevé</li>
+      </ul>
+    </div>
+    <div class="service-benefits">
+      <h4>Bénéfices</h4>
+      <ul>
+        <li>Libération de 10 à 20h de votre temps par semaine</li>
+        <li>Qualité de service professionnelle à moindre coût</li>
+        <li>Flexibilité : augmentez ou réduisez selon les besoins</li>
+      </ul>
+    </div>
+    <div class="service-actions">
+      <a href="rendez-vous.html" class="btn-green">Prendre RDV →</a>
+      <a href="devis.html" class="btn-outline">Demander un devis</a>
+    </div>
+  </div>
+  <div class="service-img">
+    <img src="https://images.unsplash.com/photo-1521737711867-e3b97375f902?w=800&q=80" alt="Externalisation" loading="lazy"/>
+    <span class="service-img-badge">BPO & Support</span>
+  </div>
+</div>
+
+<!-- SERVICE 7 : MARKETING -->
+<div id="marketing" class="service-block reveal">
+  <div class="service-content">
+    <div class="service-icon-large">🎨</div>
+    <h2 class="service-block-title">Marketing Digital & Création</h2>
+    <p class="service-block-desc">Votre image de marque est votre premier commercial. Nous créons des contenus percutants, des vidéos engageantes et une identité visuelle mémorable qui vous démarque durablement sur votre marché.</p>
+    <div class="service-features">
+      <h4>Nos prestations</h4>
+      <ul class="feature-list">
+        <li>Création de contenu (posts, articles, newsletters)</li>
+        <li>Montage vidéo et production de reels</li>
+        <li>Branding complet (logo, charte graphique, guidelines)</li>
+        <li>Photographie professionnelle (produits, corporate)</li>
+        <li>Infographie et motion design</li>
+      </ul>
+    </div>
+    <div class="service-problems">
+      <h4>Problèmes résolus</h4>
+      <ul>
+        <li>Image de marque peu professionnelle</li>
+        <li>Réseaux sociaux inactifs ou sans engagement</li>
+        <li>Manque de contenu régulier et de qualité</li>
+      </ul>
+    </div>
+    <div class="service-benefits">
+      <h4>Bénéfices</h4>
+      <ul>
+        <li>Image premium qui justifie vos tarifs</li>
+        <li>Communauté engagée autour de votre marque</li>
+        <li>Notoriété qui génère des opportunités en continu</li>
+      </ul>
+    </div>
+    <div class="service-actions">
+      <a href="rendez-vous.html" class="btn-green">Prendre RDV →</a>
+      <a href="devis.html" class="btn-outline">Demander un devis</a>
+    </div>
+  </div>
+  <div class="service-img">
+    <img src="https://images.unsplash.com/photo-1542744173-8e7e53415bb0?w=800&q=80" alt="Marketing Digital" loading="lazy"/>
+    <span class="service-img-badge">Branding & Content</span>
+  </div>
+</div>
+
+<!-- SERVICE 8 : MAINTENANCE -->
+<div id="maintenance" class="service-block reveal">
+  <div class="service-content">
+    <div class="service-icon-large">🖥️</div>
+    <h2 class="service-block-title">Maintenance Informatique</h2>
+    <p class="service-block-desc">La technologie est le nerf de la guerre. Nous assurons la continuité de vos systèmes informatiques avec des interventions préventives et correctives rapides, pour que vos équipes ne perdent jamais une minute de productivité.</p>
+    <div class="service-features">
+      <h4>Nos prestations</h4>
+      <ul class="feature-list">
+        <li>Diagnostic complet du parc informatique</li>
+        <li>Maintenance préventive planifiée</li>
+        <li>Intervention corrective rapide (moins de 4h)</li>
+        <li>Assistance technique à distance et sur site</li>
+        <li>Sécurisation des données et sauvegardes</li>
+      </ul>
+    </div>
+    <div class="service-problems">
+      <h4>Problèmes résolus</h4>
+      <ul>
+        <li>Pannes fréquentes qui bloquent la production</li>
+        <li>Perte de données non sauvegardées</li>
+        <li>Systèmes lents et obsolètes</li>
+      </ul>
+    </div>
+    <div class="service-benefits">
+      <h4>Bénéfices</h4>
+      <ul>
+        <li>Continuité opérationnelle garantie</li>
+        <li>Réduction des incidents de 70% en moyenne</li>
+        <li>Données sécurisées et récupérables</li>
+      </ul>
+    </div>
+    <div class="service-actions">
+      <a href="rendez-vous.html" class="btn-green">Prendre RDV →</a>
+      <a href="devis.html" class="btn-outline">Demander un devis</a>
+    </div>
+  </div>
+  <div class="service-img">
+    <img src="https://images.unsplash.com/photo-1518770660439-4636190af475?w=800&q=80" alt="Maintenance informatique" loading="lazy"/>
+    <span class="service-img-badge">IT & Sécurité</span>
+  </div>
+</div>
+
+<!-- CTA -->
+<div class="cta-band">
+  <p class="section-eyebrow">Passez à l'action</p>
+  <h2>Quel service répond à votre besoin ?</h2>
+  <p>Réservez un diagnostic gratuit de 30 minutes et notre équipe vous oriente vers la solution la plus adaptée à votre situation.</p>
+  <div class="cta-actions">
+    <a href="rendez-vous.html" class="btn-green">Diagnostic gratuit →</a>
+    <a href="devis.html" class="btn-outline">Demander un devis</a>
+  </div>
+</div>
+
+<div id="footer-placeholder"></div>
+
+<script src="shared.js"></script>
+<script>
+  document.getElementById('nav-placeholder').innerHTML = ACDEES.nav('services');
+  document.getElementById('footer-placeholder').innerHTML = ACDEES.footer();
+  ACDEES.revealInit();
+
+  // Services nav highlight on scroll
+  const sections = document.querySelectorAll('.service-block');
+  const navLinks = document.querySelectorAll('.services-nav a');
+  window.addEventListener('scroll', () => {
+    let current = '';
+    sections.forEach(s => { if(window.scrollY >= s.offsetTop - 200) current = s.id; });
+    navLinks.forEach(a => {
+      a.classList.remove('active');
+      if(a.getAttribute('href') === '#'+current) a.classList.add('active');
+    });
+  });
+</script>
+</body>
+</html>

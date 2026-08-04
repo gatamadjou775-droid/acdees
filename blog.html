@@ -1,0 +1,227 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Blog — ACDEES</title>
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,600;0,700;1,400&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet"/>
+  <link rel="stylesheet" href="shared.css"/>
+  <style>
+    .blog-layout { display:grid; grid-template-columns:1fr 320px; gap:56px; padding:72px 64px; max-width:1300px; margin:0 auto; }
+    .blog-filters { display:flex; gap:10px; flex-wrap:wrap; margin-bottom:44px; }
+    .blog-filter { font-size:.74rem; letter-spacing:.12em; text-transform:uppercase; padding:8px 18px; border-radius:100px; border:1px solid var(--border); color:rgba(255,255,255,.5); background:transparent; cursor:pointer; transition:all .3s; }
+    .blog-filter:hover,.blog-filter.active { border-color:var(--green); color:var(--white); background:rgba(31,122,61,.12); }
+
+    .article-featured { background:var(--surface); border:1px solid var(--border); border-radius:16px; overflow:hidden; margin-bottom:32px; display:grid; grid-template-columns:1fr 1fr; }
+    .article-featured-img { height:320px; overflow:hidden; }
+    .article-featured-img img { width:100%; height:100%; object-fit:cover; filter:brightness(.75); transition:transform .5s; }
+    .article-featured:hover .article-featured-img img { transform:scale(1.04); }
+    .article-featured-body { padding:40px 36px; display:flex; flex-direction:column; justify-content:center; }
+    .article-featured-badge { display:inline-block; font-size:.62rem; letter-spacing:.16em; text-transform:uppercase; color:var(--gold); background:rgba(212,175,55,.1); border:1px solid var(--border-gold); padding:4px 12px; border-radius:100px; margin-bottom:16px; }
+    .article-featured-title { font-family:'Playfair Display',serif; font-size:1.5rem; color:var(--white); margin-bottom:14px; line-height:1.25; }
+    .article-featured-desc { font-size:.85rem; color:rgba(255,255,255,.55); line-height:1.8; margin-bottom:20px; }
+    .article-meta { display:flex; gap:16px; font-size:.72rem; color:rgba(255,255,255,.35); margin-bottom:20px; }
+    .read-more { font-size:.76rem; letter-spacing:.12em; text-transform:uppercase; color:var(--green); text-decoration:none; display:inline-flex; align-items:center; gap:6px; transition:gap .3s; }
+    .read-more:hover { gap:12px; color:var(--gold); }
+
+    .articles-grid { display:grid; grid-template-columns:repeat(2,1fr); gap:22px; }
+    .article-card { background:var(--surface); border:1px solid var(--border); border-radius:14px; overflow:hidden; transition:transform .3s,box-shadow .3s,border-color .3s; }
+    .article-card:hover { transform:translateY(-5px); box-shadow:0 16px 48px rgba(0,0,0,.25); border-color:var(--border-green); }
+    .article-thumb { height:170px; overflow:hidden; }
+    .article-thumb img { width:100%; height:100%; object-fit:cover; filter:brightness(.75); transition:transform .5s; }
+    .article-card:hover .article-thumb img { transform:scale(1.05); }
+    .article-body { padding:22px 20px; }
+    .article-cat { font-size:.62rem; letter-spacing:.16em; text-transform:uppercase; margin-bottom:8px; }
+    .cat-digital { color:#7dd3fc; }
+    .cat-ia { color:#6ee7a0; }
+    .cat-marketing { color:var(--gold); }
+    .cat-entrepreneuriat { color:#a5b4fc; }
+    .cat-leadership { color:#fdba74; }
+    .cat-productivite { color:#f0abfc; }
+    .article-title { font-family:'Playfair Display',serif; font-size:1rem; color:var(--white); margin-bottom:8px; line-height:1.3; }
+    .article-desc { font-size:.78rem; color:rgba(255,255,255,.45); line-height:1.7; margin-bottom:14px; }
+    .article-footer { display:flex; align-items:center; justify-content:space-between; padding-top:12px; border-top:1px solid var(--border); }
+    .article-date { font-size:.7rem; color:rgba(255,255,255,.3); }
+
+    /* Sidebar */
+    .sidebar-widget { background:var(--surface); border:1px solid var(--border); border-radius:14px; padding:26px; margin-bottom:20px; }
+    .sidebar-widget h3 { font-family:'Playfair Display',serif; font-size:1rem; color:var(--gold); margin-bottom:18px; }
+    .popular-list { list-style:none; display:flex; flex-direction:column; gap:14px; }
+    .popular-item { display:flex; gap:12px; align-items:flex-start; }
+    .popular-num { font-family:'Playfair Display',serif; font-size:1.1rem; color:rgba(255,255,255,.15); flex-shrink:0; width:20px; }
+    .popular-title { font-size:.83rem; color:rgba(255,255,255,.7); line-height:1.4; transition:color .3s; cursor:pointer; }
+    .popular-title:hover { color:var(--gold); }
+    .popular-cat { font-size:.65rem; color:var(--green); margin-top:3px; }
+
+    .newsletter-form { margin-top:4px; }
+    .newsletter-form input { width:100%; background:rgba(255,255,255,.04); border:1px solid var(--border); border-radius:6px; color:var(--white); font-family:'Inter',sans-serif; font-size:.85rem; padding:11px 14px; outline:none; transition:border-color .3s; margin-bottom:10px; }
+    .newsletter-form input:focus { border-color:var(--green); }
+    .newsletter-form input::placeholder { color:rgba(255,255,255,.2); }
+    .newsletter-form button { width:100%; background:var(--green); color:var(--white); font-size:.78rem; font-weight:500; letter-spacing:.1em; text-transform:uppercase; padding:12px; border-radius:6px; border:none; cursor:pointer; font-family:'Inter',sans-serif; transition:background .3s; }
+    .newsletter-form button:hover { background:var(--green-dark); }
+
+    .tags-cloud { display:flex; flex-wrap:wrap; gap:8px; }
+
+    @media(max-width:1024px) { .blog-layout { grid-template-columns:1fr; } }
+    @media(max-width:700px) {
+      .blog-layout { padding:48px 20px; }
+      .article-featured { grid-template-columns:1fr; }
+      .article-featured-img { height:220px; }
+      .articles-grid { grid-template-columns:1fr; }
+    }
+  </style>
+</head>
+<body>
+<div id="nav-placeholder"></div>
+
+<div class="page-hero">
+  <div class="page-hero-grid"></div>
+  <div class="page-hero-inner">
+    <div class="breadcrumb"><a href="index.html">Accueil</a> › <span>Blog</span></div>
+    <div class="page-eyebrow">Ressources & Insights</div>
+    <h1 class="page-title">Le Blog <span>ACDEES</span></h1>
+    <p class="page-subtitle">Transformation digitale, IA, marketing, entrepreneuriat, leadership. Des contenus actionnables pour les entrepreneurs africains ambitieux.</p>
+  </div>
+</div>
+
+<div class="blog-layout">
+  <!-- MAIN -->
+  <div>
+    <!-- Filters -->
+    <div class="blog-filters">
+      <button class="blog-filter active" onclick="filterBlog('all',this)">Tous les articles</button>
+      <button class="blog-filter" onclick="filterBlog('digital',this)">🌐 Digital</button>
+      <button class="blog-filter" onclick="filterBlog('ia',this)">🤖 IA</button>
+      <button class="blog-filter" onclick="filterBlog('marketing',this)">📣 Marketing</button>
+      <button class="blog-filter" onclick="filterBlog('entrepreneuriat',this)">🚀 Entrepreneuriat</button>
+      <button class="blog-filter" onclick="filterBlog('leadership',this)">👑 Leadership</button>
+    </div>
+
+    <!-- Featured -->
+    <div class="article-featured reveal" id="featured-article">
+      <div class="article-featured-img">
+        <img src="https://images.unsplash.com/photo-1677442135703-1787eea5ce01?w=700&q=80" alt="IA Entreprise"/>
+      </div>
+      <div class="article-featured-body">
+        <span class="article-featured-badge">⭐ À la une</span>
+        <h2 class="article-featured-title">Comment l'IA va transformer votre entreprise en 2025 (même si vous n'êtes pas tech)</h2>
+        <div class="article-meta">
+          <span>🤖 Intelligence Artificielle</span>
+          <span>8 min de lecture</span>
+          <span>Juin 2025</span>
+        </div>
+        <p class="article-featured-desc">L'intelligence artificielle n'est plus un luxe réservé aux grandes entreprises. Découvrez comment les PME africaines intègrent concrètement l'IA dans leurs opérations et gagnent en compétitivité.</p>
+        <a href="blog.html" class="read-more">Lire l'article →</a>
+      </div>
+    </div>
+
+    <!-- Grid -->
+    <div class="articles-grid" id="blog-grid"></div>
+  </div>
+
+  <!-- SIDEBAR -->
+  <div>
+    <div class="sidebar-widget">
+      <h3>📈 Articles populaires</h3>
+      <ul class="popular-list">
+        <li class="popular-item"><span class="popular-num">01</span><div><div class="popular-title">5 erreurs qui freinent la croissance de votre PME</div><div class="popular-cat">Entrepreneuriat</div></div></li>
+        <li class="popular-item"><span class="popular-num">02</span><div><div class="popular-title">Comment automatiser votre service client avec un chatbot IA</div><div class="popular-cat">Intelligence Artificielle</div></div></li>
+        <li class="popular-item"><span class="popular-num">03</span><div><div class="popular-title">Facebook Ads en Afrique : ce qui marche vraiment</div><div class="popular-cat">Marketing Digital</div></div></li>
+        <li class="popular-item"><span class="popular-num">04</span><div><div class="popular-title">CRM : pourquoi votre entreprise en a besoin maintenant</div><div class="popular-cat">Digitalisation</div></div></li>
+        <li class="popular-item"><span class="popular-num">05</span><div><div class="popular-title">Leadership africain : les 7 qualités des dirigeants qui réussissent</div><div class="popular-cat">Leadership</div></div></li>
+      </ul>
+    </div>
+
+    <div class="sidebar-widget">
+      <h3>📧 Newsletter ACDEES</h3>
+      <p style="font-size:.82rem;color:rgba(255,255,255,.45);margin-bottom:16px;line-height:1.7;">Recevez chaque semaine nos meilleurs conseils pour développer votre entreprise.</p>
+      <div class="newsletter-form">
+        <input type="email" id="nl-email" placeholder="votre@email.com"/>
+        <button onclick="subscribeNewsletter()">Je m'abonne →</button>
+        <div id="nl-success" style="display:none;font-size:.78rem;color:#6ee7a0;margin-top:8px;text-align:center;">✓ Inscription confirmée !</div>
+      </div>
+    </div>
+
+    <div class="sidebar-widget">
+      <h3>🏷️ Thématiques</h3>
+      <div class="tags-cloud">
+        <span class="tag" style="cursor:pointer;" onclick="filterBlog('digital',null)">Digitalisation</span>
+        <span class="tag" style="cursor:pointer;" onclick="filterBlog('ia',null)">IA</span>
+        <span class="tag-gold" style="cursor:pointer;" onclick="filterBlog('marketing',null)">Marketing</span>
+        <span class="tag" style="cursor:pointer;" onclick="filterBlog('entrepreneuriat',null)">Entrepreneuriat</span>
+        <span class="tag" style="cursor:pointer;">Leadership</span>
+        <span class="tag-gold" style="cursor:pointer;">Vente</span>
+        <span class="tag" style="cursor:pointer;">Productivité</span>
+        <span class="tag" style="cursor:pointer;">CRM</span>
+        <span class="tag-gold" style="cursor:pointer;">PME Afrique</span>
+      </div>
+    </div>
+
+    <div class="sidebar-widget" style="background:linear-gradient(135deg,rgba(31,122,61,.15),rgba(212,175,55,.06));border-color:var(--border-green);">
+      <div style="font-size:2rem;margin-bottom:10px;">🎯</div>
+      <h3 style="color:var(--white);margin-bottom:12px;">Besoin d'un accompagnement ?</h3>
+      <p style="font-size:.82rem;color:rgba(255,255,255,.5);line-height:1.7;margin-bottom:18px;">Passez à l'action avec un diagnostic gratuit de 30 minutes.</p>
+      <a href="rendez-vous.html" class="btn-green" style="display:block;text-align:center;">Réserver mon diagnostic</a>
+    </div>
+  </div>
+</div>
+
+<div id="footer-placeholder"></div>
+<script src="shared.js"></script>
+<script>
+  document.getElementById('nav-placeholder').innerHTML = ACDEES.nav('blog');
+  document.getElementById('footer-placeholder').innerHTML = ACDEES.footer();
+
+  const ARTICLES = [
+    { cat:'digital', title:'Digitaliser son entreprise : par où commencer en 2025 ?', desc:'Un guide pas à pas pour les dirigeants qui veulent moderniser leurs opérations sans se perdre dans la technologie.', img:'https://images.unsplash.com/photo-1551288049-bebda4e38f71?w=500&q=80', date:'Mai 2025', time:'6 min' },
+    { cat:'marketing', title:'Facebook Ads : comment créer des publicités qui convertissent vraiment', desc:'Les secrets des campagnes rentables en Côte d\'Ivoire et en Afrique de l\'Ouest. Ciblage, visuels, budgets.', img:'https://images.unsplash.com/photo-1611162617213-7d7a39e9b1d7?w=500&q=80', date:'Avril 2025', time:'7 min' },
+    { cat:'entrepreneuriat', title:'5 signes que votre entreprise est prête à scaler', desc:'Comment savoir quand passer à la vitesse supérieure — et comment le faire sans tout casser.', img:'https://images.unsplash.com/photo-1552664730-d307ca884978?w=500&q=80', date:'Avril 2025', time:'5 min' },
+    { cat:'ia', title:'ChatGPT pour les entrepreneurs : 10 cas d\'usage concrets', desc:'Comment utiliser ChatGPT au quotidien pour rédiger, analyser, automatiser et gagner 2 heures par jour.', img:'https://images.unsplash.com/photo-1485827404703-89b55fcc595e?w=500&q=80', date:'Mars 2025', time:'8 min' },
+    { cat:'leadership', title:'Les 7 habitudes des dirigeants africains qui réussissent', desc:'Ce que les meilleurs leaders ont en commun — et comment les cultiver dans votre quotidien de chef d\'entreprise.', img:'https://images.unsplash.com/photo-1517245386807-bb43f82c33c4?w=500&q=80', date:'Mars 2025', time:'6 min' },
+    { cat:'digital', title:'CRM : pourquoi votre PME en a absolument besoin', desc:'Ne perdez plus jamais un client par manque de suivi. Tout ce que vous devez savoir sur les CRM et comment choisir.', img:'https://images.unsplash.com/photo-1460925895917-afdab827c52f?w=500&q=80', date:'Fév. 2025', time:'5 min' },
+    { cat:'marketing', title:'Personal branding : construire son autorité sur LinkedIn en Afrique', desc:'Positionnez-vous comme une référence dans votre secteur et attirez clients et opportunités naturellement.', img:'https://images.unsplash.com/photo-1542744173-8e7e53415bb0?w=500&q=80', date:'Fév. 2025', time:'7 min' },
+    { cat:'entrepreneuriat', title:'Comment financer sa startup en Côte d\'Ivoire en 2025', desc:'Tour d\'horizon des sources de financement disponibles : fonds propres, investisseurs, subventions, crowdfunding.', img:'https://images.unsplash.com/photo-1559136555-9303baea8ebd?w=500&q=80', date:'Jan. 2025', time:'9 min' },
+  ];
+
+  const CAT_COLORS = { digital:'cat-digital', ia:'cat-ia', marketing:'cat-marketing', entrepreneuriat:'cat-entrepreneuriat', leadership:'cat-leadership', productivite:'cat-productivite' };
+  const CAT_LABELS = { digital:'🌐 Digitalisation', ia:'🤖 Intelligence Artificielle', marketing:'📣 Marketing', entrepreneuriat:'🚀 Entrepreneuriat', leadership:'👑 Leadership', productivite:'⚡ Productivité' };
+
+  function renderCard(a) {
+    return `<div class="article-card reveal" data-cat="${a.cat}">
+      <div class="article-thumb"><img src="${a.img}" alt="${a.title}" loading="lazy"/></div>
+      <div class="article-body">
+        <div class="article-cat ${CAT_COLORS[a.cat]||''}">${CAT_LABELS[a.cat]||a.cat}</div>
+        <h3 class="article-title">${a.title}</h3>
+        <p class="article-desc">${a.desc}</p>
+        <div class="article-footer">
+          <span class="article-date">${a.date} · ${a.time} de lecture</span>
+          <a href="blog.html" class="read-more" style="font-size:.7rem;">Lire →</a>
+        </div>
+      </div>
+    </div>`;
+  }
+
+  let currentCat = 'all';
+  function filterBlog(cat, btn) {
+    currentCat = cat;
+    if (btn) {
+      document.querySelectorAll('.blog-filter').forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+    }
+    const filtered = cat === 'all' ? ARTICLES : ARTICLES.filter(a => a.cat === cat);
+    document.getElementById('blog-grid').innerHTML = filtered.map(renderCard).join('');
+    ACDEES.revealInit();
+  }
+
+  function subscribeNewsletter() {
+    const email = document.getElementById('nl-email').value.trim();
+    if (!email || !email.includes('@')) return;
+    document.getElementById('nl-email').value = '';
+    document.getElementById('nl-success').style.display = 'block';
+    setTimeout(() => document.getElementById('nl-success').style.display = 'none', 4000);
+  }
+
+  filterBlog('all', null);
+</script>
+</body>
+</html>

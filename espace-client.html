@@ -1,0 +1,426 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Espace Client — ACDEES</title>
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,600;0,700;1,400&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet"/>
+  <link rel="stylesheet" href="shared.css"/>
+  <style>
+    .login-wrap { min-height:calc(100vh - 80px); display:flex; align-items:center; justify-content:center; padding:40px 20px; }
+    .login-card { background:var(--surface); border:1px solid var(--border-gold); border-radius:20px; padding:52px 44px; width:100%; max-width:480px; text-align:center; }
+    .login-logo { display:flex; align-items:center; justify-content:center; gap:12px; margin-bottom:32px; }
+    .login-logo .logo-mark { width:48px; height:48px; font-size:1.1rem; }
+    .login-logo .logo-text { font-size:1.6rem; }
+    .login-title { font-family:'Playfair Display',serif; font-size:1.5rem; margin-bottom:8px; }
+    .login-sub { font-size:.85rem; color:rgba(255,255,255,.4); margin-bottom:36px; }
+    .login-tabs { display:flex; background:rgba(255,255,255,.04); border-radius:10px; padding:4px; margin-bottom:32px; }
+    .login-tab { flex:1; padding:10px; border-radius:8px; font-size:.78rem; font-weight:500; letter-spacing:.08em; text-transform:uppercase; cursor:pointer; transition:all .3s; color:rgba(255,255,255,.4); border:none; background:transparent; }
+    .login-tab.active { background:var(--green); color:var(--white); }
+
+    /* Dashboard */
+    .dashboard { display:none; padding:24px 64px 80px; }
+    .dash-header { display:flex; align-items:center; justify-content:space-between; padding:18px 64px; background:var(--surface); border-bottom:1px solid var(--border); }
+    .dash-user { display:flex; align-items:center; gap:14px; }
+    .dash-avatar { width:40px; height:40px; border-radius:50%; background:linear-gradient(135deg,var(--green),var(--green-dark)); display:flex; align-items:center; justify-content:center; font-family:'Playfair Display',serif; color:var(--gold); font-size:.9rem; font-weight:600; }
+    .dash-name { font-size:.9rem; font-weight:500; }
+    .dash-role { font-size:.72rem; color:rgba(255,255,255,.4); }
+    .btn-logout { font-size:.74rem; letter-spacing:.1em; text-transform:uppercase; color:rgba(255,255,255,.35); background:none; border:1px solid var(--border); padding:8px 18px; border-radius:6px; cursor:pointer; transition:all .3s; }
+    .btn-logout:hover { border-color:rgba(220,38,38,.4); color:#fca5a5; }
+
+    .dash-nav { display:flex; gap:0; border-bottom:1px solid var(--border); margin-bottom:40px; }
+    .dash-nav-btn { padding:14px 22px; font-size:.78rem; letter-spacing:.1em; text-transform:uppercase; color:rgba(255,255,255,.4); border-bottom:2px solid transparent; cursor:pointer; transition:all .3s; background:none; border-top:none; border-left:none; border-right:none; }
+    .dash-nav-btn.active { color:var(--gold); border-bottom-color:var(--gold); }
+
+    .dash-tab { display:none; }
+    .dash-tab.active { display:block; }
+
+    .welcome-grid { display:grid; grid-template-columns:repeat(4,1fr); gap:20px; margin-bottom:40px; }
+    .kpi-card { background:var(--surface); border:1px solid var(--border); border-radius:14px; padding:24px; }
+    .kpi-val { font-family:'Playfair Display',serif; font-size:2rem; color:var(--gold); line-height:1; }
+    .kpi-label { font-size:.75rem; color:rgba(255,255,255,.4); margin-top:6px; }
+    .kpi-trend { font-size:.72rem; color:#6ee7a0; margin-top:4px; }
+
+    .projects-list { display:flex; flex-direction:column; gap:14px; }
+    .project-row { background:var(--surface); border:1px solid var(--border); border-radius:12px; padding:20px 24px; display:flex; align-items:center; gap:20px; }
+    .project-icon { width:44px; height:44px; flex-shrink:0; border-radius:10px; background:var(--green-glow); border:1px solid var(--border-green); display:flex; align-items:center; justify-content:center; font-size:1.1rem; }
+    .project-name { font-size:.92rem; font-weight:500; color:var(--white); margin-bottom:3px; }
+    .project-service { font-size:.74rem; color:rgba(255,255,255,.4); }
+    .project-status { margin-left:auto; }
+    .status-pill { font-size:.68rem; letter-spacing:.1em; text-transform:uppercase; padding:5px 14px; border-radius:100px; }
+    .status-active { background:rgba(31,122,61,.2); color:#6ee7a0; border:1px solid rgba(110,231,160,.2); }
+    .status-pending { background:rgba(212,175,55,.1); color:var(--gold); border:1px solid var(--border-gold); }
+    .status-done { background:rgba(255,255,255,.05); color:rgba(255,255,255,.4); border:1px solid var(--border); }
+    .project-progress { margin-top:10px; }
+    .progress-bar { background:rgba(255,255,255,.06); border-radius:100px; height:4px; margin-top:6px; }
+    .progress-fill { height:100%; background:linear-gradient(to right,var(--green),var(--gold)); border-radius:100px; }
+
+    .docs-grid { display:grid; grid-template-columns:repeat(3,1fr); gap:16px; }
+    .doc-card { background:var(--surface); border:1px solid var(--border); border-radius:12px; padding:20px; display:flex; align-items:center; gap:14px; cursor:pointer; transition:all .3s; }
+    .doc-card:hover { border-color:var(--border-green); background:rgba(31,122,61,.06); }
+    .doc-icon { font-size:1.8rem; flex-shrink:0; }
+    .doc-name { font-size:.85rem; color:var(--white); margin-bottom:2px; }
+    .doc-meta { font-size:.72rem; color:rgba(255,255,255,.35); }
+    .doc-dl { margin-left:auto; font-size:.8rem; color:var(--gold); opacity:0; transition:opacity .3s; }
+    .doc-card:hover .doc-dl { opacity:1; }
+
+    .messages-list { display:flex; flex-direction:column; gap:14px; }
+    .msg-card { background:var(--surface); border:1px solid var(--border); border-radius:12px; padding:20px 24px; }
+    .msg-header { display:flex; align-items:center; justify-content:space-between; margin-bottom:10px; }
+    .msg-from { font-size:.85rem; font-weight:500; }
+    .msg-date { font-size:.72rem; color:rgba(255,255,255,.3); }
+    .msg-text { font-size:.85rem; color:rgba(255,255,255,.55); line-height:1.7; }
+    .msg-unread { width:8px; height:8px; background:var(--green); border-radius:50%; flex-shrink:0; }
+
+    .formations-list { display:flex; flex-direction:column; gap:14px; }
+    .forma-row { background:var(--surface); border:1px solid var(--border); border-radius:12px; padding:20px 24px; display:flex; align-items:center; gap:18px; }
+    .forma-thumb { width:72px; height:48px; border-radius:8px; overflow:hidden; flex-shrink:0; }
+    .forma-thumb img { width:100%; height:100%; object-fit:cover; filter:brightness(.7); }
+    .forma-name { font-size:.88rem; color:var(--white); margin-bottom:3px; }
+    .forma-progress { font-size:.74rem; color:rgba(255,255,255,.4); margin-bottom:6px; }
+    .forma-actions { margin-left:auto; display:flex; gap:8px; }
+
+    @media(max-width:900px){
+      .dashboard { padding:20px; }
+      .dash-header { padding:14px 20px; }
+      .welcome-grid { grid-template-columns:1fr 1fr; }
+      .docs-grid { grid-template-columns:1fr 1fr; }
+    }
+    @media(max-width:600px){
+      .login-card { padding:32px 20px; }
+      .welcome-grid { grid-template-columns:1fr 1fr; }
+      .docs-grid { grid-template-columns:1fr; }
+      .project-row { flex-wrap:wrap; }
+    }
+  </style>
+</head>
+<body>
+<div id="nav-placeholder"></div>
+
+<!-- LOGIN -->
+<div class="login-wrap" id="login-section">
+  <div class="login-card">
+    <div class="login-logo">
+      <img src="logo.png" alt="ACDEES" style="height:46px;width:auto;object-fit:contain;"/>
+    </div>
+    <h2 class="login-title">Espace Client</h2>
+    <p class="login-sub">Accédez à vos projets, documents, factures et formations.</p>
+
+    <div class="login-tabs">
+      <button class="login-tab active" onclick="switchTab('login',this)">Connexion</button>
+      <button class="login-tab" onclick="switchTab('register',this)">Inscription</button>
+    </div>
+
+    <div id="alert-login" class="alert"></div>
+
+    <!-- Login -->
+    <div id="tab-login">
+      <div class="form-group" style="text-align:left;">
+        <label class="form-label">Email</label>
+        <input class="form-input" type="email" id="l_email" placeholder="vous@exemple.com"/>
+      </div>
+      <div class="form-group" style="text-align:left;">
+        <label class="form-label">Mot de passe</label>
+        <input class="form-input" type="password" id="l_pass" placeholder="••••••••"/>
+      </div>
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:24px;">
+        <label style="display:flex;align-items:center;gap:8px;font-size:.8rem;color:rgba(255,255,255,.45);cursor:pointer;">
+          <input type="checkbox" style="accent-color:var(--green);"/> Se souvenir de moi
+        </label>
+        <a href="contact.html" style="font-size:.78rem;color:var(--gold);text-decoration:none;">Mot de passe oublié ?</a>
+      </div>
+      <button class="btn-green" onclick="login()" style="width:100%;padding:15px;">Se connecter →</button>
+      <div style="margin-top:16px;font-size:.78rem;color:rgba(255,255,255,.3);">
+        Démo : entrez n'importe quel email + mot de passe
+      </div>
+    </div>
+
+    <!-- Register -->
+    <div id="tab-register" style="display:none;">
+      <div class="form-grid">
+        <div class="form-group" style="text-align:left;">
+          <label class="form-label">Prénom <span class="req">*</span></label>
+          <input class="form-input" type="text" id="r_prenom" placeholder="Prénom"/>
+        </div>
+        <div class="form-group" style="text-align:left;">
+          <label class="form-label">Nom <span class="req">*</span></label>
+          <input class="form-input" type="text" id="r_nom" placeholder="Nom"/>
+        </div>
+      </div>
+      <div class="form-group" style="text-align:left;">
+        <label class="form-label">Email <span class="req">*</span></label>
+        <input class="form-input" type="email" id="r_email" placeholder="vous@exemple.com"/>
+      </div>
+      <div class="form-group" style="text-align:left;">
+        <label class="form-label">Téléphone / WhatsApp</label>
+        <input class="form-input" type="tel" id="r_tel" placeholder="+225 07 00 00 00 00"/>
+      </div>
+      <div class="form-group" style="text-align:left;">
+        <label class="form-label">Mot de passe <span class="req">*</span></label>
+        <input class="form-input" type="password" id="r_pass" placeholder="Minimum 8 caractères"/>
+      </div>
+      <button class="btn-green" onclick="register()" style="width:100%;padding:15px;">Créer mon compte →</button>
+    </div>
+
+    <div style="margin-top:28px;padding-top:20px;border-top:1px solid var(--border);">
+      <p style="font-size:.78rem;color:rgba(255,255,255,.35);">Pas encore client ACDEES ?</p>
+      <a href="rendez-vous.html" class="btn-outline" style="display:inline-block;margin-top:10px;font-size:.75rem;padding:10px 24px;">Prendre un diagnostic gratuit</a>
+    </div>
+  </div>
+</div>
+
+<!-- DASHBOARD -->
+<div id="dashboard-section" style="display:none;">
+  <div class="dash-header">
+    <a class="logo" href="index.html">
+      <img src="logo.png" alt="ACDEES" style="height:40px;width:auto;object-fit:contain;"/>
+    </a>
+    <div class="dash-user">
+      <div class="dash-avatar" id="dash-initials">KD</div>
+      <div><div class="dash-name" id="dash-name">Client ACDEES</div><div class="dash-role">Client Premium</div></div>
+    </div>
+    <button class="btn-logout" onclick="logout()">Se déconnecter</button>
+  </div>
+
+  <div class="dashboard">
+    <div class="dash-nav">
+      <button class="dash-nav-btn active" onclick="showDashTab('overview',this)">🏠 Tableau de bord</button>
+      <button class="dash-nav-btn" onclick="showDashTab('projects',this)">📋 Mes projets</button>
+      <button class="dash-nav-btn" onclick="showDashTab('documents',this)">📁 Documents</button>
+      <button class="dash-nav-btn" onclick="showDashTab('formations',this)">🎓 Formations</button>
+      <button class="dash-nav-btn" onclick="showDashTab('messages',this)">💬 Messages <span style="background:var(--green);color:var(--white);font-size:.6rem;padding:2px 6px;border-radius:100px;margin-left:4px;">2</span></button>
+      <button class="dash-nav-btn" onclick="showDashTab('factures',this)">🧾 Factures</button>
+    </div>
+
+    <!-- OVERVIEW -->
+    <div class="dash-tab active" id="tab-overview">
+      <div class="welcome-grid">
+        <div class="kpi-card"><div class="kpi-val">2</div><div class="kpi-label">Projets en cours</div><div class="kpi-trend">↑ 1 nouveau ce mois</div></div>
+        <div class="kpi-card"><div class="kpi-val">3</div><div class="kpi-label">Documents disponibles</div><div class="kpi-trend">Mis à jour récemment</div></div>
+        <div class="kpi-card"><div class="kpi-val">1</div><div class="kpi-label">Formation achetée</div><div class="kpi-trend">Progression : 45%</div></div>
+        <div class="kpi-card"><div class="kpi-val">2</div><div class="kpi-label">Messages non lus</div><div class="kpi-trend">De l'équipe ACDEES</div></div>
+      </div>
+      <div style="background:rgba(31,122,61,.08);border:1px solid var(--border-green);border-radius:14px;padding:24px 28px;margin-bottom:28px;display:flex;align-items:center;gap:18px;">
+        <div style="font-size:2rem;">👋</div>
+        <div>
+          <div style="font-family:'Playfair Display',serif;font-size:1.1rem;margin-bottom:4px;">Bienvenue dans votre espace client !</div>
+          <div style="font-size:.85rem;color:rgba(255,255,255,.55);">Retrouvez ici tous vos projets, documents, factures et formations ACDEES. Pour toute question, contactez-nous via WhatsApp.</div>
+        </div>
+        <a href="https://wa.me/2250711615439" class="btn-green" target="_blank" style="margin-left:auto;white-space:nowrap;">💬 WhatsApp</a>
+      </div>
+    </div>
+
+    <!-- PROJECTS -->
+    <div class="dash-tab" id="tab-projects">
+      <h2 style="font-family:'Playfair Display',serif;font-size:1.4rem;margin-bottom:24px;">Mes projets</h2>
+      <div class="projects-list">
+        <div class="project-row">
+          <div class="project-icon">⚡</div>
+          <div style="flex:1;">
+            <div class="project-name">Digitalisation & CRM</div>
+            <div class="project-service">Déployé par ACDEES · Démarré Jan. 2025</div>
+            <div class="project-progress">
+              <div style="display:flex;justify-content:space-between;font-size:.72rem;color:rgba(255,255,255,.35);">
+                <span>Progression</span><span>70%</span>
+              </div>
+              <div class="progress-bar"><div class="progress-fill" style="width:70%"></div></div>
+            </div>
+          </div>
+          <div class="project-status"><span class="status-pill status-active">En cours</span></div>
+        </div>
+        <div class="project-row">
+          <div class="project-icon">💻</div>
+          <div style="flex:1;">
+            <div class="project-name">Création site web vitrine</div>
+            <div class="project-service">Développement web · Démarré Mar. 2025</div>
+            <div class="project-progress">
+              <div style="display:flex;justify-content:space-between;font-size:.72rem;color:rgba(255,255,255,.35);">
+                <span>Progression</span><span>30%</span>
+              </div>
+              <div class="progress-bar"><div class="progress-fill" style="width:30%"></div></div>
+            </div>
+          </div>
+          <div class="project-status"><span class="status-pill status-pending">En attente</span></div>
+        </div>
+        <div class="project-row">
+          <div class="project-icon">🏛️</div>
+          <div style="flex:1;">
+            <div class="project-name">Diagnostic stratégique initial</div>
+            <div class="project-service">Conseil · Terminé Déc. 2024</div>
+          </div>
+          <div class="project-status"><span class="status-pill status-done">Terminé</span></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- DOCUMENTS -->
+    <div class="dash-tab" id="tab-documents">
+      <h2 style="font-family:'Playfair Display',serif;font-size:1.4rem;margin-bottom:24px;">Mes documents</h2>
+      <div class="docs-grid">
+        <div class="doc-card"><div class="doc-icon">📋</div><div><div class="doc-name">Diagnostic stratégique.pdf</div><div class="doc-meta">Jan. 2025 · 2.4 MB</div></div><span class="doc-dl">⬇</span></div>
+        <div class="doc-card"><div class="doc-icon">📊</div><div><div class="doc-name">Plan d'action Q1 2025.pdf</div><div class="doc-meta">Fév. 2025 · 1.8 MB</div></div><span class="doc-dl">⬇</span></div>
+        <div class="doc-card"><div class="doc-icon">🧾</div><div><div class="doc-name">Devis CRM DEV-2025-001.pdf</div><div class="doc-meta">Jan. 2025 · 0.5 MB</div></div><span class="doc-dl">⬇</span></div>
+        <div class="doc-card"><div class="doc-icon">📄</div><div><div class="doc-name">Contrat de mission.pdf</div><div class="doc-meta">Jan. 2025 · 1.1 MB</div></div><span class="doc-dl">⬇</span></div>
+        <div class="doc-card"><div class="doc-icon">📑</div><div><div class="doc-name">Rapport mensuel Mars.pdf</div><div class="doc-meta">Mar. 2025 · 3.2 MB</div></div><span class="doc-dl">⬇</span></div>
+        <div class="doc-card"><div class="doc-icon">🔗</div><div><div class="doc-name">Guide CRM HubSpot.pdf</div><div class="doc-meta">Fév. 2025 · 5.1 MB</div></div><span class="doc-dl">⬇</span></div>
+      </div>
+    </div>
+
+    <!-- FORMATIONS -->
+    <div class="dash-tab" id="tab-formations">
+      <h2 style="font-family:'Playfair Display',serif;font-size:1.4rem;margin-bottom:8px;">Mes formations</h2>
+      <p style="font-size:.85rem;color:rgba(255,255,255,.4);margin-bottom:24px;">Accédez à vos formations sur la plateforme Chariow.</p>
+      <div class="formations-list">
+        <div class="forma-row">
+          <div class="forma-thumb"><img src="https://images.unsplash.com/photo-1677442135703-1787eea5ce01?w=200&q=70" alt="IA"/></div>
+          <div style="flex:1;">
+            <div class="forma-name">Maîtriser l'IA pour son Entreprise</div>
+            <div class="forma-progress">Progression : 45% · Module 4/8</div>
+            <div class="progress-bar" style="width:200px;"><div class="progress-fill" style="width:45%"></div></div>
+          </div>
+          <div class="forma-actions">
+            <a href="formations.html" class="btn-small" style="font-size:.74rem;padding:9px 16px;border-radius:6px;background:var(--green);color:var(--white);text-decoration:none;">Continuer →</a>
+          </div>
+        </div>
+      </div>
+      <div style="margin-top:24px;text-align:center;padding:40px;background:var(--surface);border:1px dashed var(--border);border-radius:14px;">
+        <div style="font-size:2rem;margin-bottom:10px;">🎓</div>
+        <p style="font-size:.85rem;color:rgba(255,255,255,.4);margin-bottom:16px;">Découvrez d'autres formations ACDEES</p>
+        <a href="formations.html" class="btn-green">Voir le catalogue →</a>
+      </div>
+    </div>
+
+    <!-- MESSAGES -->
+    <div class="dash-tab" id="tab-messages">
+      <h2 style="font-family:'Playfair Display',serif;font-size:1.4rem;margin-bottom:24px;">Messages</h2>
+      <div class="messages-list">
+        <div class="msg-card" style="border-color:var(--border-green);">
+          <div class="msg-header"><span class="msg-from">🟢 Équipe ACDEES</span><div style="display:flex;align-items:center;gap:8px;"><span class="msg-date">Hier, 14h32</span><div class="msg-unread"></div></div></div>
+          <p class="msg-text">Bonjour ! La phase 2 de votre projet CRM est en cours. Nous avons configuré les pipelines de vente et les automatisations de suivi client. Un rapport complet vous sera envoyé vendredi.</p>
+        </div>
+        <div class="msg-card" style="border-color:var(--border-green);">
+          <div class="msg-header"><span class="msg-from">🟢 Équipe ACDEES</span><div style="display:flex;align-items:center;gap:8px;"><span class="msg-date">Il y a 3 jours</span><div class="msg-unread"></div></div></div>
+          <p class="msg-text">Votre diagnostic stratégique est disponible en téléchargement dans l'onglet Documents. N'hésitez pas à nous contacter pour des questions.</p>
+        </div>
+        <div class="msg-card">
+          <div class="msg-header"><span class="msg-from">📋 ACDEES — Système</span><span class="msg-date">Il y a 1 semaine</span></div>
+          <p class="msg-text">Bienvenue dans votre espace client ACDEES ! Votre compte a été créé avec succès. Vous pouvez dès maintenant suivre l'avancement de vos projets, télécharger vos documents et accéder à vos formations.</p>
+        </div>
+      </div>
+      <div style="margin-top:24px;text-align:center;">
+        <a href="https://wa.me/2250711615439" class="btn-green" target="_blank">💬 Contacter l'équipe sur WhatsApp</a>
+      </div>
+    </div>
+
+    <!-- FACTURES -->
+    <div class="dash-tab" id="tab-factures">
+      <h2 style="font-family:'Playfair Display',serif;font-size:1.4rem;margin-bottom:24px;">Mes factures</h2>
+      <div style="overflow-x:auto;">
+        <table style="width:100%;border-collapse:collapse;">
+          <thead>
+            <tr style="border-bottom:1px solid var(--border);">
+              <th style="text-align:left;padding:12px 16px;font-size:.7rem;letter-spacing:.14em;text-transform:uppercase;color:rgba(255,255,255,.35);">Référence</th>
+              <th style="text-align:left;padding:12px 16px;font-size:.7rem;letter-spacing:.14em;text-transform:uppercase;color:rgba(255,255,255,.35);">Service</th>
+              <th style="text-align:left;padding:12px 16px;font-size:.7rem;letter-spacing:.14em;text-transform:uppercase;color:rgba(255,255,255,.35);">Date</th>
+              <th style="text-align:left;padding:12px 16px;font-size:.7rem;letter-spacing:.14em;text-transform:uppercase;color:rgba(255,255,255,.35);">Montant</th>
+              <th style="text-align:left;padding:12px 16px;font-size:.7rem;letter-spacing:.14em;text-transform:uppercase;color:rgba(255,255,255,.35);">Statut</th>
+              <th></th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr style="border-bottom:1px solid var(--border);transition:background .2s;" onmouseover="this.style.background='rgba(255,255,255,.02)'" onmouseout="this.style.background=''">
+              <td style="padding:16px;font-size:.85rem;color:var(--gold);">FAC-2025-003</td>
+              <td style="padding:16px;font-size:.85rem;color:rgba(255,255,255,.7);">Digitalisation CRM</td>
+              <td style="padding:16px;font-size:.85rem;color:rgba(255,255,255,.45);">Mar. 2025</td>
+              <td style="padding:16px;font-family:'Playfair Display',serif;color:var(--white);">350 000 FCFA</td>
+              <td style="padding:16px;"><span class="status-pill status-active">Payée</span></td>
+              <td style="padding:16px;"><button style="background:none;border:1px solid var(--border);color:rgba(255,255,255,.4);font-size:.72rem;padding:6px 14px;border-radius:6px;cursor:pointer;">⬇ PDF</button></td>
+            </tr>
+            <tr style="border-bottom:1px solid var(--border);transition:background .2s;" onmouseover="this.style.background='rgba(255,255,255,.02)'" onmouseout="this.style.background=''">
+              <td style="padding:16px;font-size:.85rem;color:var(--gold);">FAC-2025-001</td>
+              <td style="padding:16px;font-size:.85rem;color:rgba(255,255,255,.7);">Diagnostic stratégique</td>
+              <td style="padding:16px;font-size:.85rem;color:rgba(255,255,255,.45);">Jan. 2025</td>
+              <td style="padding:16px;font-family:'Playfair Display',serif;color:var(--white);">150 000 FCFA</td>
+              <td style="padding:16px;"><span class="status-pill status-active">Payée</span></td>
+              <td style="padding:16px;"><button style="background:none;border:1px solid var(--border);color:rgba(255,255,255,.4);font-size:.72rem;padding:6px 14px;border-radius:6px;cursor:pointer;">⬇ PDF</button></td>
+            </tr>
+            <tr onmouseover="this.style.background='rgba(255,255,255,.02)'" onmouseout="this.style.background=''">
+              <td style="padding:16px;font-size:.85rem;color:var(--gold);">FAC-2025-004</td>
+              <td style="padding:16px;font-size:.85rem;color:rgba(255,255,255,.7);">Site web vitrine</td>
+              <td style="padding:16px;font-size:.85rem;color:rgba(255,255,255,.45);">Avr. 2025</td>
+              <td style="padding:16px;font-family:'Playfair Display',serif;color:var(--white);">200 000 FCFA</td>
+              <td style="padding:16px;"><span class="status-pill status-pending">En attente</span></td>
+              <td style="padding:16px;"><button style="background:var(--green);border:none;color:var(--white);font-size:.72rem;padding:6px 14px;border-radius:6px;cursor:pointer;">Payer →</button></td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div id="footer-placeholder-login" style="display:none;"></div>
+<script src="shared.js"></script>
+<script>
+  document.getElementById('nav-placeholder').innerHTML = ACDEES.nav();
+
+  function switchTab(tab, btn) {
+    document.querySelectorAll('.login-tab').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+    document.getElementById('tab-login').style.display = tab === 'login' ? 'block' : 'none';
+    document.getElementById('tab-register').style.display = tab === 'register' ? 'block' : 'none';
+  }
+
+  function showAlert(msg, type) {
+    const a = document.getElementById('alert-login');
+    a.textContent = msg; a.className = 'alert alert-' + type; a.style.display = 'block';
+    setTimeout(() => a.style.display = 'none', 4000);
+  }
+
+  function login() {
+    const email = document.getElementById('l_email').value.trim();
+    const pass = document.getElementById('l_pass').value;
+    if (!email || !email.includes('@')) return showAlert('Email invalide.', 'error');
+    if (pass.length < 4) return showAlert('Mot de passe trop court.', 'error');
+    const name = email.split('@')[0];
+    openDashboard(name);
+  }
+
+  function register() {
+    const prenom = document.getElementById('r_prenom').value.trim();
+    const nom = document.getElementById('r_nom').value.trim();
+    const email = document.getElementById('r_email').value.trim();
+    const pass = document.getElementById('r_pass').value;
+    if (!prenom || !nom) return showAlert('Veuillez entrer votre nom complet.', 'error');
+    if (!email || !email.includes('@')) return showAlert('Email invalide.', 'error');
+    if (pass.length < 8) return showAlert('Le mot de passe doit comporter au moins 8 caractères.', 'error');
+    openDashboard(prenom + ' ' + nom);
+  }
+
+  function openDashboard(name) {
+    document.getElementById('login-section').style.display = 'none';
+    document.getElementById('dashboard-section').style.display = 'block';
+    document.getElementById('footer-placeholder-login').style.display = 'block';
+    document.getElementById('footer-placeholder-login').innerHTML = ACDEES.footer();
+    const initials = name.split(' ').map(w => w[0]).join('').toUpperCase().slice(0,2);
+    document.getElementById('dash-initials').textContent = initials;
+    document.getElementById('dash-name').textContent = name;
+  }
+
+  function logout() {
+    document.getElementById('dashboard-section').style.display = 'none';
+    document.getElementById('footer-placeholder-login').style.display = 'none';
+    document.getElementById('login-section').style.display = 'flex';
+    document.getElementById('l_email').value = '';
+    document.getElementById('l_pass').value = '';
+  }
+
+  function showDashTab(tab, btn) {
+    document.querySelectorAll('.dash-tab').forEach(t => t.classList.remove('active'));
+    document.querySelectorAll('.dash-nav-btn').forEach(b => b.classList.remove('active'));
+    document.getElementById('tab-' + tab).classList.add('active');
+    btn.classList.add('active');
+  }
+</script>
+</body>
+</html>
